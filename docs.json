@@ -86,5 +86,8 @@
       "weight": 400
     }
   },
-  "description": "The MerchantE Developer Center contains information on the MerchantE APIs. Merchant developers integrate and build with MerchantE APIs so their businesses programmatically process, manage, and integrate payment and platform operations directly into their websites, mobile apps, or custom software. The site gives API reference information and integration guides for the Payment Gateway API and other MerchantE APIs."
+  "description": "The MerchantE Developer Center contains information on the MerchantE APIs. Merchant developers integrate and build with MerchantE APIs so their businesses programmatically process, manage, and integrate payment and platform operations directly into their websites, mobile apps, or custom software. The site gives API reference information and integration guides for the Payment Gateway API and other MerchantE APIs.",
+  "api": {
+    "openapi": "split-funding.json"
+  }
 }
