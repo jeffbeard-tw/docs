@@ -34,8 +34,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/images/MEbyOmiselogo(onlight).svg",
+    "dark": "/images/MEbyOmiselogo(ondark).svg"
   },
   "navbar": {
     "links": [
