@@ -13,8 +13,14 @@
       {
         "group": "Getting Started",
         "pages": [
-          "index",
           "quickstart"
+        ]
+      },
+      {
+        "group": "API Guides",
+        "pages": [
+          "api_specs/payment_gateway_api_spec",
+          "api_specs/reporting_api_spec"
         ]
       }
     ],
