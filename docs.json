@@ -13,6 +13,7 @@
       {
         "group": "API guides",
         "pages": [
+          "api_specs/account_updater_api_spec",
           "api_specs/payment_gateway_api_spec",
           "api_specs/reporting_api_spec",
           "api_specs/ach_pg_api_spec",
