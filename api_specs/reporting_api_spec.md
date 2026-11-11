@@ -1,9 +1,6 @@
 ---
 title: "Reporting API Guide"
 ---
-
-# Introduction
-
 The MerchantE by Omise platform provides a robust variety of reports to assist in reconciliation of card and ACH transactions. In addition to providing reports via the web, an API servlet is available for users that prefer to download the data into their own system in CSV format. An additional option to download data in XML format is also available.
 
 To initiate a request, users must provide a valid user name and password with the rights necessary to use the reporting API and access the requested report. Although several reports are available via the API, only reports enabled for that user name will be accessible. 
