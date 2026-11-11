@@ -10,7 +10,6 @@
   "favicon": "/favicon.svg",
   "navigation": {
     "pages": [
-      "merchant-e-developer-center",
       {
         "group": "API guides",
         "pages": [
