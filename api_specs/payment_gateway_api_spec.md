@@ -1490,7 +1490,7 @@ the Response.
 | 06P | Verification Data Fail |
 | 061 | Exc App Amt Lmt |
 | 062 | Restricted card (card invalid in this region or co
- |
+|  |  |
 | 064 | Transaction does not fulfill AML requirement |
 | 065 | Exc W/D Freq Lmt |
 | 075 | PIN exceeded |
