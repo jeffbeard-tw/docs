@@ -1,42 +1,169 @@
 ---
-title: "MerchantE Developer Center"
-description: "Everything you need to build with our platform."
+title: "Home"
+description: "Integration guides and API reference for the Payment Gateway API and other MerchantE APIs."
+mode: "frame"
 ---
 
+export const brand = {
+  black: "#05080D",
+  green: "#30BF8F",
+  mint: "#80FFBF",
+  blue: "#3333FF",
+  offWhite: "#F2F2F2",
+  headline: "'Outfit', 'DM Sans', system-ui, sans-serif",
+  body: "'DM Sans', system-ui, sans-serif",
+};
+
 export const HeroCard = ({ title, description, href, icon }) => (
-  <a className="group block p-6 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 transition-colors" href={href}>
-    <h3 className="font-medium text-gray-900 dark:text-zinc-50">
+  <a
+    href={href}
+    className="group block p-6 rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:border-emerald-400 dark:hover:border-emerald-300 hover:-translate-y-0.5 transition-all no-underline"
+    style={{ fontFamily: brand.body, borderBottom: `3px solid ${brand.green}` }}
+  >
+    <div
+      className="flex items-center justify-center w-11 h-11 rounded-xl"
+      style={{ background: brand.mint, color: brand.black }}
+    >
+      <Icon icon={icon} size={20} color={brand.black} />
+    </div>
+    <h3
+      className="mt-5 text-lg font-semibold text-gray-900 dark:text-zinc-50"
+      style={{ fontFamily: brand.body }}
+    >
       {title}
     </h3>
-    <p className="mt-2 text-sm text-gray-500 dark:text-zinc-500">
+    <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-zinc-400">
       {description}
     </p>
+    <span
+      className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-gray-900 dark:text-zinc-50 group-hover:gap-2 transition-all"
+    >
+      Explore <span aria-hidden="true">→</span>
+    </span>
   </a>
 );
 
-<div className="px-4 py-16 lg:py-32 max-w-3xl mx-auto text-center">
-  <h1 className="text-4xl font-medium text-gray-900 dark:text-zinc-50 tracking-tight">
-    MerchantE Developer Documentation
-  </h1>
-  <p className="mt-4 text-lg text-gray-500 dark:text-zinc-500 max-w-xl mx-auto">
-    Everything you need to build and integrate with the our APIs.
-  </p>
+export const Capability = ({ label, text }) => (
+  <div className="flex-1 min-w-[200px]">
+    <div
+      className="text-xs font-semibold tracking-widest uppercase"
+      style={{ color: brand.green, fontFamily: brand.headline }}
+    >
+      {label}
+    </div>
+    <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-zinc-400">
+      {text}
+    </p>
+  </div>
+);
+
+{/* Hero */}
+<div
+  className="relative overflow-hidden"
+  style={{
+    background: `radial-gradient(circle at 85% 0%, ${brand.blue}59 0%, transparent 45%), radial-gradient(circle at 10% 100%, ${brand.green}40 0%, transparent 50%), ${brand.black}`,
+    color: brand.offWhite,
+  }}
+>
+  <div className="px-6 py-16 lg:py-28 max-w-4xl mx-auto text-center">
+    <div
+      className="inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase"
+      style={{
+        border: `1px solid ${brand.mint}`,
+        color: brand.mint,
+        fontFamily: brand.headline,
+      }}
+    >
+      Developer Center
+    </div>
+
+    <h1
+      className="mt-6 text-4xl lg:text-6xl font-semibold uppercase tracking-tight"
+      style={{ fontFamily: brand.headline, color: brand.offWhite, lineHeight: 1.05 }}
+    >
+      Build with{" "}
+      <span style={{ color: brand.mint }}>MerchantE</span>
+    </h1>
+
+    <p
+      className="mt-6 text-lg max-w-2xl mx-auto leading-relaxed"
+      style={{ fontFamily: brand.body, color: "#D0D5DB" }}
+    >
+      Integrate and build with the MerchantE APIs to process, manage, and
+      embed payments and platform operations directly into your website,
+      mobile app, or custom software.
+    </p>
+
+    <div className="mt-10 flex flex-wrap gap-4 justify-center">
+      <a
+        href="/guides"
+        className="px-6 py-3 rounded-lg font-semibold no-underline"
+        style={{ background: brand.mint, color: brand.black, fontFamily: brand.body }}
+      >
+        Guides
+      </a>
+      <a
+        href="/api-reference"
+        className="px-6 py-3 rounded-lg font-semibold no-underline"
+        style={{
+          border: `1px solid ${brand.offWhite}`,
+          color: brand.offWhite,
+          fontFamily: brand.body,
+        }}
+      >
+        API reference
+      </a>
+    </div>
+  </div>
 </div>
 
-<div className="max-w-4xl mx-auto px-6 pb-16 grid sm:grid-cols-2 gap-4">
+{/* Navigation cards */}
+<div className="max-w-5xl mx-auto px-6 pt-12 pb-8 grid sm:grid-cols-3 gap-5">
   <HeroCard
     title="Quickstart"
-    description="Get up and running."
+    description="Get set up and make your first API call."
     href="/quickstart"
+    icon="rocket"
   />
   <HeroCard
     title="API reference"
-    description="Explore endpoints, parameters, and examples."
+    description="Explore endpoints, parameters, and examples for the Payment Gateway API and other MerchantE APIs."
     href="/api-reference"
+    icon="code"
   />
   <HeroCard
     title="Guides"
-    description="Step-by-step tutorials for common tasks."
+    description="Step-by-step integration tutorials for common tasks."
     href="/guides"
+    icon="book-open"
   />
+</div>
+
+{/* What you can do */}
+<div className="max-w-5xl mx-auto px-6 pt-8 pb-20">
+  <div
+    className="rounded-2xl p-8 border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/40"
+    style={{ borderLeft: `4px solid ${brand.green}` }}
+  >
+    <h2
+      className="text-xl font-semibold uppercase tracking-tight text-gray-900 dark:text-zinc-50 mt-0"
+      style={{ fontFamily: brand.headline }}
+    >
+      Built for developers
+    </h2>
+    <div className="mt-6 flex flex-wrap gap-8">
+      <Capability
+        label="Process"
+        text="Accept and process payments programmatically through the Payment Gateway API."
+      />
+      <Capability
+        label="Manage"
+        text="Handle payment and platform operations from your own systems."
+      />
+      <Capability
+        label="Integrate"
+        text="Embed MerchantE directly into your website, mobile app, or custom software."
+      />
+    </div>
+  </div>
 </div>
