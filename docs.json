@@ -18,7 +18,35 @@
         ]
       },
       {
-        "group": "API reference",
+        "group": "Payment Gateway API",
+        "openapi": {
+          "source": "OpenAPI/payment-gateway.yaml",
+          "directory": "api-reference/payment-gateway"
+        }
+      },
+      {
+        "group": "Account Updater API",
+        "openapi": {
+          "source": "OpenAPI/account-updater.yaml",
+          "directory": "api-reference/account-updater"
+        }
+      },
+      {
+        "group": "Batch Processing API",
+        "openapi": {
+          "source": "OpenAPI/batch-processing.yaml",
+          "directory": "api-reference/batch-processing"
+        }
+      },
+      {
+        "group": "Partner Portal API",
+        "openapi": {
+          "source": "OpenAPI/partner-portal.yaml",
+          "directory": "api-reference/partner-portal"
+        }
+      },
+      {
+        "group": "Split Funding API",
         "openapi": {
           "source": "OpenAPI/split-funding.yaml",
           "directory": "api-reference/split-funding"
