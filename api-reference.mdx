@@ -4,7 +4,7 @@ description: "Endpoint reference for each MerchantE API."
 ---
 
 export const ApiTile = ({ method, title, path, href }) => {
-  const kind = method === "GET" ? "api-tile-get" : method === "POST" ? "api-tile-post" : "api-tile-other";
+  const kind = method === "GET" ? "api-tile-get" : method === "POST" ? "api-tile-post" : method === "PATCH" ? "api-tile-patch" : "api-tile-other";
   return (
     <a href={href} className={"api-tile " + kind}>
       <div className="flex items-center gap-2">

@@ -28,6 +28,15 @@
 .dark .api-tile-post {
   color: rgb(96 165 250);
 }
+/* PATCH: orange-400 @ 20% background, orange-700 text (light) / orange-400 text (dark) */
+.api-tile-patch {
+  background-color: rgb(251 146 60 / 0.2);
+  border-color: rgb(251 146 60 / 0.4);
+  color: rgb(194 65 12);
+}
+.dark .api-tile-patch {
+  color: rgb(251 146 60);
+}
 .api-tile-other {
   background-color: rgb(249 250 251);
   border-color: rgb(229 231 235);
