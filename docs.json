@@ -14,7 +14,12 @@
         "group": "API Guides",
         "pages": [
           "api_specs/payment_gateway_api_spec",
-          "api_specs/reporting_api_spec"
+          "api_specs/reporting_api_spec",
+          "api_specs/ach_pg_api_spec",
+          "api_specs/batch_processing_api_spec",
+          "api_specs/partner_to_portal_api_spec",
+          "api_specs/split_funding_api_spec",
+          "api_specs/submerchant_api_spec"
         ]
       },
       {
