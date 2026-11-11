@@ -1,0 +1,40 @@
+/* API reference method tiles. Colors match the GET/POST method pills in the sidebar. */
+.api-tile {
+  display: block;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid;
+  text-decoration: none;
+  transition: transform 150ms ease;
+}
+.api-tile:hover {
+  transform: translateY(-0.125rem);
+}
+/* GET: green-400 @ 20% background, green-700 text (light) / green-400 text (dark) */
+.api-tile-get {
+  background-color: rgb(74 222 128 / 0.2);
+  border-color: rgb(74 222 128 / 0.4);
+  color: rgb(21 128 61);
+}
+.dark .api-tile-get {
+  color: rgb(74 222 128);
+}
+/* POST: blue-400 @ 20% background, blue-700 text (light) / blue-400 text (dark) */
+.api-tile-post {
+  background-color: rgb(96 165 250 / 0.2);
+  border-color: rgb(96 165 250 / 0.4);
+  color: rgb(29 78 216);
+}
+.dark .api-tile-post {
+  color: rgb(96 165 250);
+}
+.api-tile-other {
+  background-color: rgb(249 250 251);
+  border-color: rgb(229 231 235);
+  color: rgb(55 65 81);
+}
+.dark .api-tile-other {
+  background-color: rgb(24 24 27 / 0.4);
+  border-color: rgb(39 39 42);
+  color: rgb(212 212 216);
+}
