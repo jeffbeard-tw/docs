@@ -93,10 +93,6 @@ paths:
                   type: string
                   maxLength: 32
                   format: password
-                userPass:
-                  type: string
-                  maxLength: 32
-                  format: password
                   example: SecureP@ss123
                 merchId:
                   type: string
