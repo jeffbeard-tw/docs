@@ -11,7 +11,7 @@
   "navigation": {
     "pages": [
       {
-        "group": "API Guides",
+        "group": "API guides",
         "pages": [
           "api_specs/payment_gateway_api_spec",
           "api_specs/reporting_api_spec",
@@ -56,6 +56,10 @@
           "source": "OpenAPI/split-funding.yaml",
           "directory": "api-reference/split-funding"
         }
+      },
+      {
+        "group": "Integration guides",
+        "pages": []
       }
     ]
   },
