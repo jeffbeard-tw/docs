@@ -56,10 +56,6 @@
           "source": "OpenAPI/split-funding.yaml",
           "directory": "api-reference/split-funding"
         }
-      },
-      {
-        "group": "Integration guides",
-        "pages": []
       }
     ]
   },
