@@ -1,3 +1,5 @@
+---
+title: "Reporting API Guide"
 
 # Introduction
 
