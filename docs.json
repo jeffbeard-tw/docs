@@ -11,12 +11,6 @@
   "navigation": {
     "pages": [
       {
-        "group": "Getting Started",
-        "pages": [
-          "quickstart"
-        ]
-      },
-      {
         "group": "API Guides",
         "pages": [
           "api_specs/payment_gateway_api_spec",
