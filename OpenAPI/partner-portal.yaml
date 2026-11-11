@@ -1,0 +1,2078 @@
+openapi: 3.0.3
+info:
+  title: MerchantE Partner to Portal API
+  description: |
+    The MerchantE Partner to Portal API offers a streamlined process to pass merchant business information 
+    related to a sales opportunity, a partial application, or a completed application to MerchantE. This API 
+    model is based on the MerchantE application and the business information required to underwrite and 
+    onboard merchants with our company.
+    
+    Clients of this API are granted the ability to create, update, or delete Salesforce objects containing 
+    business information specific to an opportunity, directly from their own customer relationship management 
+    system. These objects are then transposed to the Partner Portal in a viewable format, where they will 
+    display data needed to onboard the account so that the merchant may begin to process credit card 
+    transactions.
+    
+    ## Documentation
+    - Technical documentation and SDK libraries: https://developer.merchante.com
+    - PCI Security Standards: https://www.pcisecuritystandards.org/
+    - NAICS lookup: https://www.census.gov/econ/isp/
+    
+    ## Important Notes
+    - The Merchant DBA Name is always required
+    - DDA Type is required when submitting checking account information
+    - Entity Type, Last Name and Contact Role are required when submitting contact information
+    - Product Name is required when submitting equipment information
+    - Updates to applications in "Pending Underwriting" or "Closed Won" stages are not allowed
+  version: "3.5"
+  contact:
+    name: MerchantE Partner Support
+    url: https://www.merchante.com
+  license:
+    name: Proprietary
+    url: https://www.merchante.com
+
+servers:
+  - url: https://merchante-solutions.my.salesforce.com
+    description: Production server
+  - url: https://test.salesforce.com
+    description: Certification server
+
+security:
+  - OAuth2: []
+
+paths:
+  /services/oauth2/token:
+    post:
+      summary: Get Authentication Token
+      description: |
+        Generate an OAuth 2.0 access token for API authentication.
+        
+        **Note**: Auth token is valid for 24 hours.
+      operationId: getAuthToken
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - grant_type
+                - client_id
+                - client_secret
+                - username
+                - password
+              properties:
+                grant_type:
+                  type: string
+                  enum:
+                    - password
+                  description: Literal "password" text
+                client_id:
+                  type: string
+                  description: Different for each sandbox/org (provided by SE)
+                client_secret:
+                  type: string
+                  description: Different for each sandbox/org (provided by SE)
+                username:
+                  type: string
+                  example: partnerportalapi@merchante.com.cert
+                  description: Different for each sandbox/org
+                password:
+                  type: string
+                  description: Password + Security Token (provided by secure email). Security Token is not always required depending on the org configuration
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: OAuth 2.0 access token (valid for 24 hours)
+                  instance_url:
+                    type: string
+                  id:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+                  issued_at:
+                    type: string
+                  signature:
+                    type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /services/data/v54.0/composite/sobjects:
+    post:
+      summary: Create Merchant Application
+      description: |
+        Creates a new merchant application with all related objects including Account, Opportunity, 
+        Contacts (Beneficial Owners), Business Checking Accounts, Quote, and Quote Line Items.
+        
+        **Required Information**:
+        - The Merchant DBA Name is always required
+        - DDA Type is required when submitting checking account information
+        - Entity Type, Last Name and Contact Role are required when submitting contact information
+        - Product Name is required when submitting equipment information
+        
+        **Business Rules**:
+        - At least one Primary Contact/Beneficial Owner must be identified
+        - Only one Control Owner is allowed per application
+        - Only one Authorized Signer is allowed per application
+        - Maximum 4 Beneficial Owners are allowed per application
+        - Only 1 Beneficial Owner is allowed for Sole Proprietorship
+        - Sum of % Ownership for all Beneficial Owners must not exceed 100%
+      operationId: createApplication
+      tags:
+        - Merchant Application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApplicationRequest'
+      responses:
+        '200':
+          description: Application created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+    patch:
+      summary: Update Merchant Application
+      description: |
+        Updates an existing merchant application and its related objects.
+        
+        **Important Notes**:
+        - The "id" field represents the SFId of the ObjectType being updated
+        - Include the Opportunity SFID for Update requests
+        - Source ID can be used to relate SFID to the corresponding fields provided
+        - Updates to applications in "Pending Underwriting" or "Closed Won" stages are not allowed
+      operationId: updateApplication
+      tags:
+        - Merchant Application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApplicationRequest'
+      responses:
+        '200':
+          description: Application updated successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /services/data/v54.0/sobjects/Opportunity/{opportunityId}:
+    get:
+      summary: Get Opportunity
+      description: Retrieve information for a specific opportunity
+      operationId: getOpportunity
+      tags:
+        - Retrieval
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          description: The SFId value associated with the ObjectType Opportunity
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Opportunity details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        '404':
+          description: Opportunity not found
+
+  /services/data/v54.0/sobjects/Opportunity/{opportunityId}/Account:
+    get:
+      summary: Get Account
+      description: Retrieve account information for a specific opportunity
+      operationId: getAccount
+      tags:
+        - Retrieval
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Account details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+
+  /services/data/v54.0/sobjects/Opportunity/{opportunityId}/Account/Contacts:
+    get:
+      summary: Get Contacts
+      description: Retrieve all contacts for a specific opportunity's account
+      operationId: getContacts
+      tags:
+        - Retrieval
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+
+  /services/data/v54.0/sobjects/Opportunity/{opportunityId}/Account/Business_Checking_Accounts__r:
+    get:
+      summary: Get Business Checking Accounts
+      description: Retrieve all business checking accounts for a specific opportunity's account
+      operationId: getBusinessCheckingAccounts
+      tags:
+        - Retrieval
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of business checking accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BusinessCheckingAccount'
+
+  /services/data/v54.0/sobjects/Opportunity/{opportunityId}/Quotes:
+    get:
+      summary: Get Quotes
+      description: Retrieve all quotes for a specific opportunity
+      operationId: getQuotes
+      tags:
+        - Retrieval
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+
+  /services/data/v54.0/sobjects/Quote/{quoteId}/QuoteLineItems:
+    get:
+      summary: Get Quote Line Items
+      description: Retrieve all quote line items for a specific quote
+      operationId: getQuoteLineItems
+      tags:
+        - Retrieval
+      parameters:
+        - name: quoteId
+          in: path
+          required: true
+          description: The SFId value associated with the ObjectType Quote
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of quote line items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuoteLineItem'
+
+  /services/data/v54.0/sobjects/Attachment:
+    post:
+      summary: Submit Attachments
+      description: |
+        Submit file attachments for an opportunity.
+        
+        **Requirements**:
+        - Opportunity ID is required
+        - File size limit: 100 MB per file
+        - Files must be converted to Base64
+        - Maximum total attachment size: 2 GB
+        - Attachments must be transmitted to this alternate endpoint
+      operationId: submitAttachments
+      tags:
+        - Attachments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachmentRequest'
+      responses:
+        '201':
+          description: Attachments created successfully
+        '400':
+          description: Bad request (e.g., file too large, missing Opportunity ID)
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: OAuth 2.0 authentication using password grant type. Access token must be passed as Type "OAUTH 2.0" with the authorization header.
+      flows:
+        password:
+          tokenUrl: /services/oauth2/token
+          scopes: {}
+
+  schemas:
+    CreateApplicationRequest:
+      type: object
+      required:
+        - Opp
+        - Mer
+      properties:
+        Opp:
+          $ref: '#/components/schemas/Opportunity'
+        Mer:
+          $ref: '#/components/schemas/Account'
+        lstBens:
+          type: array
+          description: List of Beneficial Owners (Contacts)
+          items:
+            $ref: '#/components/schemas/Contact'
+        lstbussCheckAcc:
+          type: array
+          description: List of Business Checking Accounts
+          items:
+            $ref: '#/components/schemas/BusinessCheckingAccount'
+        Lstqli:
+          type: array
+          description: List of Quote Line Items (Solutions, Fees, Equipment)
+          items:
+            $ref: '#/components/schemas/QuoteLineItem'
+
+    UpdateApplicationRequest:
+      type: object
+      required:
+        - Opp
+        - Mer
+      properties:
+        Opp:
+          allOf:
+            - $ref: '#/components/schemas/Opportunity'
+            - type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: string
+                  description: The SFId of the Opportunity being updated (required for updates)
+        Mer:
+          allOf:
+            - $ref: '#/components/schemas/Account'
+            - type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: string
+                  description: The SFId of the Account being updated (required for updates)
+        lstBens:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Contact'
+              - type: object
+                properties:
+                  id:
+                    type: string
+                    description: The SFId of the Contact being updated
+        lstbussCheckAcc:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/BusinessCheckingAccount'
+              - type: object
+                properties:
+                  id:
+                    type: string
+                    description: The SFId of the Business Checking Account being updated
+        Lstqli:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/QuoteLineItem'
+              - type: object
+                properties:
+                  Id:
+                    type: string
+                    description: The SFId of the Quote Line Item being updated (note capital 'I')
+
+    Opportunity:
+      type: object
+      required:
+        - attributes
+        - BET_Table_ID_API_Field__c
+        - Yearly_Net_Revenue__c
+        - Visa_MC_Discover_Volume__c
+        - Merchant_Application_Notes__c
+      properties:
+        attributes:
+          type: object
+          required:
+            - type
+          properties:
+            type:
+              type: string
+              enum:
+                - Opportunity
+        Auto_Submission_to_Underwriting__c:
+          type: boolean
+          description: Auto submit to underwriting
+        StageName:
+          type: string
+          description: Opportunity stage
+        RecordTypeId:
+          type: string
+          description: |
+            Record Type ID for the opportunity
+            
+            Valid Record Type IDs:
+            - Cross_Sell: 0122T000000kwYzQAI
+            - New_Direct_Merchant_Opportunity: 01234000000QEUSAA4
+            - New_Partner_Merchant: 01234000000M77hAAC
+            - New_Partner_Opportunity: 01234000000HqAGAA0
+            - Read_Only_New_Partner_Merchant: 0123x000001WMxcAAG
+            - Renewal: 0122T000000ca5QQAQ
+        Need_Pricing_Exception_Approval__c:
+          type: boolean
+          description: Whether pricing exception approval is needed
+        Account_Type__c:
+          type: string
+          description: Account type
+          enum:
+            - New Merchant
+            - Conversion Merchant
+            - Renewal Merchant
+            - Cloned Merchant Deal
+        Name:
+          type: string
+          description: Opportunity name
+          maxLength: 255
+        BET_Table_ID_API_Field__c:
+          type: string
+          description: BET Table ID (required)
+          maxLength: 255
+        Yearly_Net_Revenue__c:
+          type: number
+          format: double
+          description: Forecasted yearly net revenue (required)
+          nullable: true
+        Yearly_Card_Volume__c:
+          type: number
+          format: double
+          description: Yearly card volume
+        High_Monthly_Volume__c:
+          type: number
+          format: double
+          description: High monthly processing volume
+        Avg_Ticket__c:
+          type: number
+          format: double
+          description: Average ticket amount
+        High_Ticket__c:
+          type: number
+          format: double
+          description: High ticket amount
+        Visa_MC_Discover_Volume__c:
+          type: number
+          format: double
+          description: Visa/MC/Discover volume (required)
+        American_Express_Volume__c:
+          type: number
+          format: double
+          description: American Express volume
+        Seasonal_Months__c:
+          type: string
+          description: Seasonal months of operation (multi-select picklist - separate values with semicolons)
+          example: "Jan;Feb"
+        Customer_Type_B2B_Sales__c:
+          type: number
+          format: double
+          description: Customer Type % B2B Sales (must add up to 100% with B2C per validation rules)
+          minimum: 0
+          maximum: 100
+          nullable: true
+        Customer_Type_B2C_Sales__c:
+          type: number
+          format: double
+          description: Customer Type % B2C Sales (must add up to 100% with B2B per validation rules)
+          minimum: 0
+          maximum: 100
+        Refund_Policy__c:
+          type: string
+          description: Refund policy
+          enum:
+            - Refund in 30 days or Less
+            - No Refunds or Exchanges
+            - Exchanges Only
+            - Not Applicable
+            - Credit V/MC/Dis Account
+            - Full Refund
+            - Refund Credit
+            - Refund Merchandise
+        Days_to_Ship_Deliver__c:
+          type: string
+          description: Days to ship/deliver
+          enum:
+            - Immediate
+            - 1 to 7
+            - 8 to 14
+            - 15 to 30
+            - Over 30
+        Advanced_Payments__c:
+          type: number
+          format: double
+          description: Percentage of advanced payments
+          minimum: 0
+          maximum: 100
+        Visa_MasterCard__c:
+          type: boolean
+          description: Accepts Visa/MasterCard
+        Discover_MeS_Settlement__c:
+          type: boolean
+          description: Discover MeS settlement
+        Discover_Settlement_Existing_Merchant__c:
+          type: boolean
+          description: Discover settlement existing merchant
+        American_Express_MeS_Settlement__c:
+          type: boolean
+          description: American Express MeS settlement
+        Amex_Settlement_Existing_SE__c:
+          type: string
+          description: AmEx settlement existing SE number
+          maxLength: 255
+        Debit_with_Pin__c:
+          type: boolean
+          description: Debit with PIN
+        ACH__c:
+          type: string
+          description: ACH configuration
+        EBT__c:
+          type: string
+          description: EBT acceptance
+        FCS__c:
+          type: string
+          description: FCS number
+          maxLength: 10
+        Check_Authorization__c:
+          type: string
+          description: Check authorization
+        Name_of_Provider__c:
+          type: string
+          description: Name of provider
+          maxLength: 60
+        Merchant__c:
+          type: string
+          description: Merchant number
+          maxLength: 40
+        Check_pct__c:
+          type: number
+          format: double
+          description: Check percentage
+          minimum: 0
+          maximum: 100
+        Card_Network_Volume_Internet_CNP__c:
+          type: number
+          format: double
+          description: Card Network Volume % Internet (CNP) - must add up to 100% with other card network volume fields per validation rules
+          minimum: 0
+          maximum: 100
+        Card_Network_Volume_Manually_K_M__c:
+          type: number
+          format: double
+          description: Card Network Volume % Manually K/M (CP) - must add up to 100% with other card network volume fields per validation rules
+          minimum: 0
+          maximum: 100
+        Card_Network_Volume_MO_TO_CNP__c:
+          type: number
+          format: double
+          description: Card Network Volume % MO/TO (CNP) - must add up to 100% with other card network volume fields per validation rules
+          minimum: 0
+          maximum: 100
+        Card_Network_Volume_Swiped_CP__c:
+          type: number
+          format: double
+          description: Card Network Volume % Swiped (CP) - must add up to 100% with other card network volume fields per validation rules
+          minimum: 0
+          maximum: 100
+        ACH_Debit_Avg_Dollar_Per_Tx__c:
+          type: number
+          format: double
+          description: ACH Debit average dollar per transaction
+        ACH_Credit_Avg_Dollar_Per_Tx__c:
+          type: number
+          format: double
+          description: ACH Credit average dollar per transaction
+        ACH_Debit_Max_Dollar_Per_Tx__c:
+          type: number
+          format: double
+          description: ACH Debit maximum dollar per transaction
+        ACH_Credit_Max_Dollar_Per_Tx__c:
+          type: number
+          format: double
+          description: ACH Credit maximum dollar per transaction
+        ACH_Debit_Max_Dollar_Per_Day__c:
+          type: number
+          format: double
+          description: ACH Debit maximum dollar per day
+        ACH_Credit_Max_Dollar_Per_Day__c:
+          type: number
+          format: double
+          description: ACH Credit maximum dollar per day
+        ACH_Debit_Max_Tx_Per_Day__c:
+          type: number
+          format: double
+          description: ACH Debit maximum transactions per day
+        ACH_Credit_Max_Tx_Per_Day__c:
+          type: number
+          format: double
+          description: ACH Credit maximum transactions per day
+        ACH_Debit_Max_Dollar_Per_Month__c:
+          type: number
+          format: double
+          description: ACH Debit maximum dollar per month
+        ACH_Credit_Max_Dollar_Per_Month__c:
+          type: number
+          format: double
+          description: ACH Credit maximum dollar per month
+        ACH_Debit_Max_Tx_Per_Month__c:
+          type: number
+          format: double
+          description: ACH Debit maximum transactions per month
+        ACH_Credit_Max_Tx_Per_Month__c:
+          type: number
+          format: double
+          description: ACH Credit maximum transactions per month
+        Merchant_Application_Notes__c:
+          type: string
+          description: Merchant application notes (required)
+          maxLength: 255
+
+    Account:
+      type: object
+      required:
+        - attributes
+        - Name
+        - Legal_Name__c
+        - Tax_ID__c
+        - State_of_Entity_Formation_Incorporation__c
+        - BillingStreet
+        - BillingCity
+        - BillingStateCode
+        - BillingPostalCode
+        - BillingCountryCode
+        - ShippingStreet
+        - ShippingCity
+        - Phone
+        - App_Email__c
+        - Customer_Service_Phone__c
+        - Ownership
+        - Industry
+        - Location_Type__c
+        - Years_at_Location__c
+        - Date_Established__c
+        - Chain_Non_Chain__c
+        - Description
+        - MCC_API_Field__c
+        - Sponsorship__c
+      properties:
+        attributes:
+          type: object
+          required:
+            - type
+          properties:
+            type:
+              type: string
+              enum:
+                - Account
+        Name:
+          type: string
+          description: Merchant DBA Name (required). If field exceeds maximum length, value will be truncated.
+          maxLength: 255
+        Association_ID_API_Field__c:
+          type: string
+          description: Association ID. Validation error if invalid Association ID entered.
+          maxLength: 100
+        MCC_API_Field__c:
+          type: string
+          description: MCC (Merchant Category Code) - required. Validation error if invalid MCC entered.
+          maxLength: 100
+        Legal_Name__c:
+          type: string
+          description: Legal name (required). If field exceeds maximum length, value will be truncated.
+          maxLength: 100
+        Tax_ID__c:
+          type: string
+          description: Federal Tax ID - must be 9 digits (required). Validation error "Federal Tax ID Enter valid Federal Tax ID" if not 9 digits.
+          pattern: '^\d{9}$'
+          maxLength: 16
+        State_of_Entity_Formation_Incorporation__c:
+          type: string
+          description: State of formation/incorporation (required)
+          maxLength: 2
+        BillingStreet:
+          type: string
+          description: Legal street address (required). If field exceeds maximum length, value will be truncated.
+          maxLength: 255
+        BillingCity:
+          type: string
+          description: Legal city (required). If field exceeds maximum length, value will be truncated.
+          maxLength: 40
+        BillingStateCode:
+          type: string
+          description: Legal state/province code (required). See PDF pages 36-38 for full list of valid state codes.
+          maxLength: 80
+        BillingPostalCode:
+          type: string
+          description: Legal zip code - must be 5 digits (required). Validation error "Legal Address Zipcode Enter Valid Legal Address Zipcode" if not 5 digits.
+          pattern: '^\d{5}$'
+          maxLength: 20
+        BillingCountryCode:
+          type: string
+          description: Legal country code (required). See PDF pages 36-38 for full list of valid country codes.
+          maxLength: 80
+        ShippingStreet:
+          type: string
+          description: DBA street address (required). If field exceeds maximum length, value will be truncated.
+          maxLength: 255
+        ShippingCity:
+          type: string
+          description: DBA city. If field exceeds maximum length, value will be truncated.
+          maxLength: 40
+        ShippingStateCode:
+          type: string
+          description: DBA state/province code. See PDF pages 36-38 for full list of valid state codes.
+          maxLength: 80
+        ShippingPostalCode:
+          type: string
+          description: DBA zip code - must be 5 digits if provided. Validation error "DBA Address Zipcode Enter valid DBA Address Zipcode" if not 5 digits.
+          pattern: '^\d{5}$'
+          maxLength: 20
+        ShippingCountryCode:
+          type: string
+          description: DBA country code. See PDF pages 36-38 for full list of valid country codes.
+          maxLength: 80
+        Physical_Address_Street__c:
+          type: string
+          description: Physical address street. If field exceeds maximum length, value will be truncated.
+          maxLength: 255
+        Physical_Address_City__c:
+          type: string
+          description: Physical address city. If field exceeds maximum length, value will be truncated.
+          maxLength: 80
+        Physical_Address_State__c:
+          type: string
+          description: Physical address state. See PDF pages 36-38 for valid state codes.
+          maxLength: 80
+        Physical_Address_PostalCode__c:
+          type: string
+          description: Physical address postal code - must be 5 digits if provided. Validation error "Mailing Address Zipcode Enter valid Mailing Address Zipcode" if not 5 digits.
+          pattern: '^\d{5}$'
+          maxLength: 80
+        Phone:
+          type: string
+          description: Phone number - must be 10 digits or (999) 999-9999 format (required). Validation error "Phone/Fax number must be a 10-digit number or in (999) 999-9999 format" if invalid.
+          pattern: '^(\d{10}|\(\d{3}\)\s\d{3}-\d{4})$'
+        Fax:
+          type: string
+          description: Fax number - must be 10 digits or (999) 999-9999 format if provided. Validation error "Phone/Fax number must be a 10-digit number or in (999) 999-9999 format" if invalid.
+          pattern: '^(\d{10}|\(\d{3}\)\s\d{3}-\d{4})$'
+        App_Email__c:
+          type: string
+          format: email
+          description: Email address (required). Validation error "Enter valid Email Address" if invalid format.
+          maxLength: 100
+        Website:
+          type: string
+          format: uri
+          description: Website address
+          maxLength: 255
+        Customer_Service_Phone__c:
+          type: string
+          description: Customer service phone - must be 10 digits or (999) 999-9999 format (required)
+          pattern: '^(\d{10}|\(\d{3}\)\s\d{3}-\d{4})$'
+        Ownership:
+          type: string
+          description: |
+            Legal entity type (required). Validation error "Sponsorship is required" if missing.
+            
+            See PDF pages 27-28 for required contact fields based on this ownership type.
+          enum:
+            - Sole Proprietorship
+            - Publicly Traded Limited Liability Company
+            - Privately Held Limited Liability Company
+            - Publicly Traded Corporation
+            - Privately Held Corporation
+            - Government
+            - Tax Exempt
+            - Publicly Traded Partnership
+            - Privately Held Partnership
+            - Financial Institution
+        Industry:
+          type: string
+          description: Industry (required)
+          enum:
+            - Retail
+            - Restaurant
+            - Lodging
+            - Supermarket
+            - Ecommerce
+            - Direct Marketing Services
+            - Cash Advance
+            - Other
+        Industry_Other__c:
+          type: string
+          description: Other industry description (required if Industry is "Other")
+          maxLength: 100
+        Location_Type__c:
+          type: string
+          description: Business location type (required)
+          enum:
+            - Ecommerce
+            - Business Office
+            - Private Residence
+            - Retail Storefront
+            - Bank
+            - Other
+        Location_Other__c:
+          type: string
+          description: Other location description (required if Location_Type__c is "Other")
+          maxLength: 100
+        Years_at_Location__c:
+          type: string
+          description: Years at location (required)
+        Date_Established__c:
+          type: string
+          format: date
+          description: Date established (required)
+        Chain_Non_Chain__c:
+          type: string
+          description: Chain/Non-chain status (required)
+          enum:
+            - Single Outlet
+            - Chain/Multi-Location
+            - Additional Location
+        Description:
+          type: string
+          description: Business description (required)
+          maxLength: 32000
+        Ever_accepted_credit_cards_before__c:
+          type: boolean
+          description: Ever accepted credit cards before
+        Name_of_Previous_Processor__c:
+          type: string
+          description: Name of previous processor
+          maxLength: 100
+        Ever_had_a_merchant_account_canceled__c:
+          type: boolean
+          description: Ever had a merchant account canceled
+        Name_of_Processor_for_canceled_merchant__c:
+          type: string
+          description: Name of processor for canceled merchant account
+          maxLength: 100
+        Reason_for_cancellation__c:
+          type: string
+          description: Reason for cancellation
+          maxLength: 255
+        Date_of_cancellation__c:
+          type: string
+          format: date
+          description: Date of cancellation
+        NAICS_Category_Api_Field__c:
+          type: string
+          description: NAICS category. Validation error if invalid NAICS Category entered.
+          maxLength: 50
+        NAICS_Sub_Category_Api_Field__c:
+          type: string
+          description: NAICS sub-category. Validation error if invalid NAICS Sub Category entered.
+          maxLength: 50
+        Merchant_Category__c:
+          type: string
+          description: High risk sub-category
+          enum:
+            - None
+            - Business Opportunity
+            - CBD and CBD Based Products
+            - Consumer Lending
+            - Credit Repair
+            - Dating
+            - Discount Membership
+            - Document Prep Services
+            - Firearms/Ammunition
+            - ID Theft/Address Change/Visa and Passport Services
+            - Marketplaces (Non-Travel) - Case by Case
+            - MLM - Case by Case
+            - Money Transfer/MSB
+            - Multi-Level Marketing
+            - Not Applicable
+            - Nutra
+            - Online Gaming/Fantasy Sports
+            - Other
+            - Personal Credit Protection
+            - Telemed/Pharmacies
+            - Vape
+            - Warranties
+            - Web Related Services
+        Sponsorship__c:
+          type: string
+          description: Bank sponsorship (required). Validation error "Sponsorship is required" if missing.
+          enum:
+            - Wells Fargo
+            - Synovus
+            - Fresno First
+            - KeyBank
+            - Synovus Sabre
+            - Synovus Transcom
+        Master_Merchant_Agreement_Execution_Date__c:
+          type: string
+          format: date
+          description: Master merchant agreement execution date
+        Primary_MID__c:
+          type: string
+          description: Primary MID
+          maxLength: 12
+        Partner_Branch__c:
+          type: string
+          description: Partner branch ID (lookup field)
+          maxLength: 18
+        Change_Notes__c:
+          type: string
+          description: Change notes
+          maxLength: 65535
+
+    Contact:
+      type: object
+      required:
+        - attributes
+        - LastName
+        - Title
+        - Phone
+        - Date_of_Birth__c
+        - MailingStreet
+        - MailingCity
+        - MailingStateCode
+        - MailingPostalCode
+        - SSN__c
+        - Contact_Role__c
+        - Email
+        - Beneficial_Owner_Unique_Field__c
+      properties:
+        attributes:
+          type: object
+          required:
+            - type
+          properties:
+            type:
+              type: string
+              enum:
+                - Contact
+        LastName:
+          type: string
+          description: Last name (required)
+          maxLength: 80
+        FirstName:
+          type: string
+          description: First name
+          maxLength: 40
+        Title:
+          type: string
+          description: Title (required)
+          maxLength: 128
+        Phone:
+          type: string
+          description: Phone number (required)
+        Percentage_Owned__c:
+          type: number
+          format: double
+          description: |
+            Percentage owned - required if Contact Role includes "Beneficial Owner", must be >= 25% for Beneficial Owners.
+            
+            Validation errors:
+            - "% Owned Principal owner must own 25% or more of the merchant" if < 25% for Beneficial Owner
+            - "% Owned is not allowed for Non-Principal Contact Role" if specified for non-Beneficial Owner
+            - Sum of all Beneficial Owner % Ownership must not exceed 100%
+          minimum: 0
+          maximum: 100
+        Date_of_Birth__c:
+          type: string
+          format: date
+          description: Date of birth (required)
+        MailingStreet:
+          type: string
+          description: Mailing street (required)
+          maxLength: 255
+        MailingCity:
+          type: string
+          description: Mailing city (required)
+          maxLength: 40
+        MailingStateCode:
+          type: string
+          description: Mailing state/province code (required). See PDF pages 36-38 for valid state codes.
+          maxLength: 80
+        MailingPostalCode:
+          type: string
+          description: Mailing zip/postal code (required)
+          maxLength: 20
+        MailingCountryCode:
+          type: string
+          description: Mailing country code. See PDF pages 36-38 for valid country codes.
+          maxLength: 10
+        SSN__c:
+          type: string
+          description: |
+            Social Security Number - must be 9 digits (required).
+            
+            Validation error if not exactly 9 digits.
+          pattern: '^\d{9}$'
+          maxLength: 9
+        Contact_Role__c:
+          type: string
+          description: |
+            Contact role (required) - multi-select picklist field. Separate multiple values with semicolons.
+            
+            Validation rules:
+            - Only one "Control Owner" allowed per application
+            - Maximum 4 "Beneficial Owner" contacts allowed per application
+            - Only 1 "Beneficial Owner" allowed for Sole Proprietorship
+            - Required fields vary based on Account Ownership type (see PDF pages 27-28)
+            
+            Valid values: "Beneficial Owner", "Control Owner", "Other"
+          example: "Control Owner;Beneficial Owner"
+        Email:
+          type: string
+          format: email
+          description: Email address (required)
+          maxLength: 80
+        Primary__c:
+          type: boolean
+          description: Is primary contact
+        Beneficial_Owner_Unique_Field__c:
+          type: string
+          description: Beneficial owner unique field (required for identifying multiple contacts in create/update requests)
+          maxLength: 20
+
+    BusinessCheckingAccount:
+      type: object
+      required:
+        - attributes
+        - Bank_Name__c
+        - Bank_Street_Address__c
+        - Bank_City__c
+        - Bank_State__c
+        - Bank_Zipcode__c
+        - Checking_Account__c
+        - Transit_Routing__c
+        - Years_Open__c
+        - DDA_Type__c
+        - Checking_Account_Unique_Field__c
+      properties:
+        attributes:
+          type: object
+          required:
+            - type
+          properties:
+            type:
+              type: string
+              enum:
+                - Business_Checking_Account__c
+        Bank_Name__c:
+          type: string
+          description: Bank name (required)
+          maxLength: 255
+        Bank_Street_Address__c:
+          type: string
+          description: Bank street address (required)
+          maxLength: 255
+        Bank_City__c:
+          type: string
+          description: Bank city (required)
+          maxLength: 100
+        Bank_State__c:
+          type: string
+          description: Bank state (required) - US states only
+          maxLength: 100
+        Bank_Zipcode__c:
+          type: string
+          description: Bank zipcode (required)
+          maxLength: 20
+        Checking_Account__c:
+          type: integer
+          description: Checking account number (required)
+        Transit_Routing__c:
+          type: string
+          description: |
+            Transit routing number - must be 9 digits (required).
+            
+            Validation error "Please enter a valid 9 digit number" if not 9 digits.
+          pattern: '^\d{9}$'
+          maxLength: 100
+        Years_Open__c:
+          type: integer
+          description: Years account has been open (required)
+        DDA_Type__c:
+          type: string
+          description: |
+            DDA Type (required when submitting checking account information) - multi-select picklist field. Separate multiple values with semicolons.
+            
+            Validation rules (PDF page 70):
+            - Only one "Deposit" type account allowed per application
+            - Only one "Chargeback" type account allowed per application
+            - Only one "Fees" type account allowed per application
+            
+            Example multi-select: "Fees;Deposit"
+          example: "Deposit"
+        Checking_Account_Unique_Field__c:
+          type: string
+          description: Checking account unique field (required for identifying multiple accounts in create/update requests)
+          maxLength: 20
+
+    Quote:
+      type: object
+      properties:
+        attributes:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - Quote
+
+    QuoteLineItem:
+      type: object
+      required:
+        - attributes
+      properties:
+        attributes:
+          type: object
+          required:
+            - type
+          properties:
+            type:
+              type: string
+              enum:
+                - QuoteLineItem
+        
+        # Solutions Fields
+        MerchantE_Invoice__c:
+          type: boolean
+          description: MerchantE Invoice solution
+        POS_Terminals__c:
+          type: boolean
+          description: POS terminals
+        Terminal_Application__c:
+          type: string
+          description: Terminal application type
+          enum:
+            - Retail
+            - Restaurant
+            - Lodging
+            - Cash Advance
+        Auto_Batch_Close_HR__c:
+          type: number
+          description: Auto batch close hour
+        Auto_Batch_Close_MIN__c:
+          type: number
+          description: Auto batch close minute
+        Receipt_Header_Line_4__c:
+          type: string
+          description: Receipt header line 4
+          maxLength: 255
+        Receipt_Header_Line_5__c:
+          type: string
+          description: Receipt header line 5
+          maxLength: 255
+        Receipt_Footer__c:
+          type: string
+          description: Receipt footer
+          maxLength: 255
+        Communication_Type__c:
+          type: string
+          description: Communication type
+          enum:
+            - Dial IP
+            - Wireless
+        Clerk_Server_Prompt_On__c:
+          type: boolean
+          description: Clerk/server prompt on
+        Invoice_Prompt_On__c:
+          type: boolean
+          description: Invoice prompt on
+        Phone_training_for_merchant__c:
+          type: string
+          description: Phone training for merchant
+          enum:
+            - Yes
+            - No
+        Access_Code_to_dial_out__c:
+          type: string
+          description: Access code to dial out
+          maxLength: 255
+        AVS_On__c:
+          type: boolean
+          description: AVS on
+        Tip_Option_On__c:
+          type: boolean
+          description: Tip option on
+        Cash_Back__c:
+          type: boolean
+          description: Cash back
+        Batch_Report_Type__c:
+          type: string
+          description: Batch report type
+          enum:
+            - Summary
+            - Batch Detail
+        Equipment_Shipping_Address__c:
+          type: string
+          description: Equipment shipping address
+          enum:
+            - Merchant Business Address
+            - Legal Address
+            - Other Address
+        Other_Shipping_Address__c:
+          type: string
+          description: Other shipping address
+          maxLength: 255
+        MeS_Virtual_Terminal__c:
+          type: boolean
+          description: MeS Virtual Terminal
+        Admin_Email__c:
+          type: string
+          format: email
+          description: Admin email for MeS Virtual Terminal
+        Level_3__c:
+          type: boolean
+          description: Level 3
+        Multi_Merchant__c:
+          type: boolean
+          description: Multi merchant
+        MeS_Virtual_Terminal_Limited__c:
+          type: boolean
+          description: MeS Virtual Terminal Limited
+        Admin_Email_Limited__c:
+          type: string
+          format: email
+          description: Admin email limited
+        MeS_Payment_Gateway__c:
+          type: boolean
+          description: MerchantE Payment Platform
+        URL_Address__c:
+          type: string
+          description: URL address
+          maxLength: 255
+        Name_of_Certified_Shopping_Cart__c:
+          type: string
+          description: Name of certified shopping cart
+          maxLength: 255
+        Payment_Gateway_Administrator_Email__c:
+          type: string
+          format: email
+          description: MerchantE Payment Platform admin email
+        Processing_Option__c:
+          type: string
+          description: Processing option
+          enum:
+            - MeS Hosted Payment
+            - MeS Card Present and Card Not Present
+            - MeS eCommerce
+        MeS_Pay_by_Phone__c:
+          type: boolean
+          description: MeS Tele Pay / MeS Pay by Phone
+        Other_Solution__c:
+          type: boolean
+          description: Other solution
+        Name_of_Other_Solution__c:
+          type: string
+          description: Name of other solution
+          maxLength: 255
+        Solution_Version__c:
+          type: string
+          description: Solution version number
+          maxLength: 255
+        Name_of_the_digital_certificate_issuer__c:
+          type: string
+          description: Name of the digital certificate issuer
+          maxLength: 255
+        Digital_certificate_number_s__c:
+          type: string
+          description: Digital certificate number(s)
+          maxLength: 255
+        Digital_certificate_expiration_date_s__c:
+          type: string
+          description: Digital certificate expiration date(s)
+          maxLength: 255
+        Digital_Certificate_Ownership_Status__c:
+          type: string
+          description: Digital certificate ownership status
+          enum:
+            - Individual
+            - Shared
+        
+        # Fees - BET Table
+        BET_Table_ID_API_Field__c:
+          type: string
+          description: BET Table ID - lookup field
+          maxLength: 255
+        
+        # Fees - Visa/MC/Discover
+        V_MC_Acceptance_Options__c:
+          type: string
+          description: V/MC acceptance options
+          enum:
+            - Credit/Business Cards
+            - Debit/Prepaid Cards
+            - Both
+        V_MC_Authorization_Fee__c:
+          type: number
+          description: V/MC authorization fee
+        V_MC_Diff_Plus_Plan__c:
+          type: boolean
+          description: |
+            V/MC Diff Plus Plan (only one V/MC plan can be selected per validation rules).
+            
+            If selected, only these fields can be submitted:
+            - V_MC_Diff_Plus_Percentage__c
+            - V_MC_Diff_Plus_Credit_Qualified_Per_Item__c
+            - V_MC_Diff_Plus_Credit_Qualified_Rate__c
+            - V_MC_Diff_Plus_Debit_Qualified_Per_Item__c
+            - V_MC_Diff_Plus_Debit_Qualified_Rate__c
+        V_MC_Diff_Plus_Percentage__c:
+          type: number
+          description: V/MC Diff Plus percentage
+        V_MC_Diff_Plus_Credit_Qualified_Per_Item__c:
+          type: number
+          description: V/MC Diff Plus credit qualified per item
+        V_MC_Diff_Plus_Credit_Qualified_Rate__c:
+          type: number
+          description: V/MC Diff Plus credit qualified rate
+        V_MC_Diff_Plus_Debit_Qualified_Per_Item__c:
+          type: number
+          description: V/MC Diff Plus debit qualified per item
+        V_MC_Diff_Plus_Debit_Qualified_Rate__c:
+          type: number
+          description: V/MC Diff Plus debit qualified rate
+        V_MC_Pass_Through_Plan__c:
+          type: boolean
+          description: |
+            V/MC Pass Through Plan (only one V/MC plan can be selected per validation rules).
+            
+            If selected, only these fields can be submitted:
+            - V_MC_Pass_Through_Per_Item__c
+            - V_MC_Pass_Through_Rate__c
+        V_MC_Pass_Through_Per_Item__c:
+          type: number
+          description: V/MC Pass Through per item
+        V_MC_Pass_Through_Rate__c:
+          type: number
+          description: V/MC Pass Through rate
+        V_MC_Tiered_Plan__c:
+          type: boolean
+          description: |
+            V/MC Tiered Plan (only one V/MC plan can be selected per validation rules).
+            
+            If selected, only Tiered fields can be submitted.
+        V_MC_Tiered_Commercial_Qual_Per_Item__c:
+          type: number
+          description: V/MC Tiered commercial qualified per item
+        V_MC_Tiered_Commercial_Qual_Rate__c:
+          type: number
+          description: V/MC Tiered commercial qualified rate
+        V_MC_Tiered_Credit_Qualified_Per_Item__c:
+          type: number
+          description: V/MC Tiered credit qualified per item
+        V_MC_Tiered_Credit_Qualified_Rate__c:
+          type: number
+          description: V/MC Tiered credit qualified rate
+        V_MC_Tiered_Debit_Qualified_Per_Item__c:
+          type: number
+          description: V/MC Tiered debit qualified per item
+        V_MC_Tiered_Debit_Qualified_Rate__c:
+          type: number
+          description: V/MC Tiered debit qualified rate
+        V_MC_Tiered_Mid_Qual_Per_Item__c:
+          type: number
+          description: V/MC Tiered mid qual per item
+        V_MC_Tiered_Mid_Qual_Rate__c:
+          type: number
+          description: V/MC Tiered mid qual rate
+        V_MC_Tiered_Non_Qual_Per_Item__c:
+          type: number
+          description: V/MC Tiered non qual per item
+        V_MC_Tiered_Non_Qual_Rate__c:
+          type: number
+          description: V/MC Tiered non qual rate
+        V_MC_Tiered_Rewards_Rate__c:
+          type: number
+          description: V/MC Tiered rewards rate
+        V_MC_Tiered_Rewards_Rate_Per_Item__c:
+          type: number
+          description: V/MC Tiered rewards rate per item
+        
+        # Fees - American Express
+        Amex_Authorization_Fee__c:
+          type: number
+          description: Amex authorization fee
+        Amex_Tiered_Plan__c:
+          type: boolean
+          description: |
+            Amex Bundled Plan (only one Amex plan can be selected per validation rules).
+            
+            If selected, only these fields can be submitted:
+            - Amex_Tier_3_Per_Item__c
+            - Amex_Tier_3_Rate__c
+        Amex_Tier_3_Per_Item__c:
+          type: number
+          description: Amex Bundled per item
+        Amex_Tier_3_Rate__c:
+          type: number
+          description: Amex Bundled rate
+        Amex_Pass_Through_Plan__c:
+          type: boolean
+          description: |
+            Amex Pass Through Plan (only one Amex plan can be selected per validation rules).
+            
+            If selected, only these fields can be submitted:
+            - Amex_Pass_Through_Per_Item__c
+            - Amex_Pass_Through_Rate__c
+        Amex_Pass_Through_Per_Item__c:
+          type: number
+          description: Amex Pass Through per item
+        Amex_Pass_Through_Rate__c:
+          type: number
+          description: Amex Pass Through rate
+        
+        # Fees - Pin Debit
+        Pin_Debit_Authorization_Fee__c:
+          type: number
+          description: Pin Debit authorization fee
+        Pin_Debit_Pass_Through_Plan__c:
+          type: boolean
+          description: Pin Debit Pass Through Plan
+        Pin_Debit_Pass_Through_Rate__c:
+          type: number
+          description: Pin Debit Pass Through rate
+        Pin_Debit_Pass_Through_Per_Item__c:
+          type: number
+          description: Pin Debit Pass Through per item
+        
+        # Fees - Authorization
+        ARU__c:
+          type: number
+          description: ARU fee
+        Operator_Assisted__c:
+          type: number
+          description: Operator assisted fee
+        AVS__c:
+          type: number
+          description: AVS fee
+        Bank_Referral__c:
+          type: number
+          description: Bank referral fee
+        JCB_CUP__c:
+          type: number
+          description: JCB/CUP fee
+        EBT__c:
+          type: number
+          description: EBT fee
+        Other_Authorization_Fee_Other_Fee_Name__c:
+          type: string
+          description: Other authorization fee name 1
+          enum:
+            - PayFlow Pro
+            - MeS Payment Gateway
+        Other_Authorization_Fee_Other_Fee_Name2__c:
+          type: string
+          description: Other authorization fee name 2
+          maxLength: 255
+        Other_Authorization_Fee_Other_Fee_Amt1__c:
+          type: number
+          description: Other authorization fee amount 1
+        Other_Authorization_Fee_Other_Fee_Amt2__c:
+          type: number
+          description: Other authorization fee amount 2
+        
+        # Fees - One Time
+        Account_Application__c:
+          type: number
+          description: Account application fee
+        New_Account_Setup__c:
+          type: number
+          description: New account setup fee
+        One_Time_Account_Updater__c:
+          type: number
+          description: One time account updater fee
+        Wireless_Setup__c:
+          type: number
+          description: Wireless setup fee
+        One_Time_Fees_Other_Fee_Name_1__c:
+          type: string
+          description: One time fees other fee name 1
+          enum:
+            - USAePay Setup
+            - PayFlow Pro Setup
+            - PayFlow Link Setup
+            - MeS VT Setup
+            - MeS Limited Setup
+            - MeS Payment Gateway setup
+            - SwipeSimple Setup
+        One_Time_Fees_Other_Fee_Name_2__c:
+          type: string
+          description: One time fees other fee name 2
+          maxLength: 255
+        One_Time_Fees_Other_Fee_Amount_1__c:
+          type: number
+          description: One time fees other fee amount 1
+        One_Time_Fees_Other_Fee_Amount_2__c:
+          type: number
+          description: One time fees other fee amount 2
+        
+        # Fees - Per Occurrence
+        Minimum_Discount__c:
+          type: number
+          description: Minimum discount fee
+        Chargeback_Fee__c:
+          type: number
+          description: Chargeback fee
+        Return_NSF__c:
+          type: number
+          description: Return NSF fee
+        Batch_Fee__c:
+          type: number
+          description: Batch fee
+        Internet_Per_Trans__c:
+          type: number
+          description: Internet per transaction fee
+        Per_Occurrence_Account_Updater__c:
+          type: number
+          description: Per occurrence account updater fee
+        Yearly_Admin__c:
+          type: number
+          description: Yearly admin fee
+        Yearly_Payment_Gateway__c:
+          type: number
+          description: Yearly payment gateway fee
+        Per_Occurrence_Other_Fee_Name_1__c:
+          type: string
+          description: Per occurrence other fee name 1
+          maxLength: 255
+        Per_Occurrence_Other_Fee_Name_2__c:
+          type: string
+          description: Per occurrence other fee name 2
+          maxLength: 255
+        Per_Occurrence_Other_Fee_Amount_1__c:
+          type: number
+          description: Per occurrence other fee amount 1
+        Per_Occurrence_Other_Fee_Amount_2__c:
+          type: number
+          description: Per occurrence other fee amount 2
+        
+        # Fees - Monthly
+        Statement_Fee__c:
+          type: number
+          description: Statement fee
+        Electronic_Statement__c:
+          type: boolean
+          description: Electronic statement
+        Paper_Statement__c:
+          type: boolean
+          description: Paper statement
+        PCI_Admin_Monthly__c:
+          type: number
+          description: PCI admin monthly fee
+        PCI_Late_Validation__c:
+          type: number
+          description: PCI late validation fee
+        Wireless_Fees__c:
+          type: number
+          description: Wireless fees
+        Business_Hub_Account_Service_Monthly_Fee__c:
+          type: number
+          description: |
+            Business Hub/Account Service monthly fee.
+            
+            Validation rule (PDF page 71): Must be $29.95 or $0.00 only.
+          enum:
+            - 0
+            - 29.95
+        Hosted_payments_fee__c:
+          type: number
+          description: Hosted payments fee
+        MerchantE_Invoice_Monthly_Fee__c:
+          type: number
+          description: MerchantE Invoice monthly fee
+        MerchantE_Invoice_Link_Fee__c:
+          type: number
+          description: MerchantE Invoice Link fee
+        Monthly_Fees_Other_Fee_Name_1__c:
+          type: string
+          description: Monthly fees other fee name 1
+          enum:
+            - USAePay Monthly
+            - PayFlow Pro Monthly
+            - PayFlow Link Monthly
+            - SwipeSimple Monthly
+            - Solution Platform
+            - EmployeePlus Payouts
+            - Pre-Imbursements
+            - Interchange Optimization
+            - MerchantE Invoice
+        Monthly_Fees_Other_Fee_Name_2__c:
+          type: string
+          description: Monthly fees other fee name 2
+          enum:
+            - USAePay Monthly
+            - PayFlow Pro Monthly
+            - PayFlow Link Monthly
+            - SwipeSimple Monthly
+            - Solution Platform
+            - EmployeePlus Payouts
+            - Pre-Imbursements
+            - Interchange Optimization
+            - MerchantE Invoice
+        Monthly_Fees_Other_Fee_Name_3__c:
+          type: string
+          description: Monthly fees other fee name 3
+          maxLength: 255
+        Monthly_Fees_Other_Fee_Name_4__c:
+          type: string
+          description: Monthly fees other fee name 4
+          maxLength: 255
+        Monthly_Fees_Other_Fee_Name_5__c:
+          type: string
+          description: Monthly fees other fee name 5
+          enum:
+            - USAePay Monthly
+            - PayFlow Pro Monthly
+            - PayFlow Link Monthly
+            - SwipeSimple Monthly
+            - Solution Platform
+            - EmployeePlus Payouts
+            - Pre-Imbursements
+            - Interchange Optimization
+            - MerchantE Invoice
+        Monthly_Fees_Other_Fee_Name_6__c:
+          type: string
+          description: Monthly fees other fee name 6
+          enum:
+            - USAePay Monthly
+            - PayFlow Pro Monthly
+            - PayFlow Link Monthly
+            - SwipeSimple Monthly
+            - Solution Platform
+            - EmployeePlus Payouts
+            - Pre-Imbursements
+            - Interchange Optimization
+            - MerchantE Invoice
+        Monthly_Fees_Other_Fee_Amount_1__c:
+          type: number
+          description: Monthly fees other fee amount 1
+        Monthly_Fees_Other_Fee_Amount_2__c:
+          type: number
+          description: Monthly fees other fee amount 2
+        Monthly_Fees_Other_Fee_Amount_3__c:
+          type: number
+          description: Monthly fees other fee amount 3
+        Monthly_Fees_Other_Fee_Amount_4__c:
+          type: number
+          description: Monthly fees other fee amount 4
+        Monthly_Fees_Other_Fee_Amount_5__c:
+          type: number
+          description: Monthly fees other fee amount 5
+        Monthly_Fees_Other_Fee_Amount_6__c:
+          type: number
+          description: Monthly fees other fee amount 6
+        Surcharge_Amount__c:
+          type: number
+          description: Surcharge amount ($)
+        
+        # ACH Fees
+        ACH_Transaction_Fee_Amount__c:
+          type: number
+          description: ACH transaction fee amount
+        ACH_Transaction_Fee__c:
+          type: number
+          description: ACH transaction fee percentage
+        ACH_Monthly_Service_Fee__c:
+          type: number
+          description: ACH monthly service fee
+        ACH_Return_Re_presentment_Fee__c:
+          type: number
+          description: ACH return/re-presentment fee
+        ACH_Unauthorized_Return_State_Fee__c:
+          type: number
+          description: ACH unauthorized return state fee
+        ACH_SmartPay_Express_Setup_Fee__c:
+          type: number
+          description: ACH SmartPay Express setup fee
+        ACH_SmartPay_Express_Monthly_Fee__c:
+          type: number
+          description: ACH SmartPay Express monthly fee
+        ACH_Hosted_Pay_Monthly_Fee__c:
+          type: number
+          description: ACH Hosted Pay monthly fee
+        Gross_Settlement_Fee__c:
+          type: number
+          description: Gross settlement fee
+        ACH_Additional_Location_Monthly_Fee__c:
+          type: number
+          description: ACH additional location monthly fee
+        ACH_Additional_Bk_Account_Monthly_Fee__c:
+          type: number
+          description: ACH additional bank account monthly fee
+        
+        # ACH Services
+        ACH_Services__c:
+          type: boolean
+          description: ACH services
+        ACH_Web_API__c:
+          type: boolean
+          description: ACH Web API / Web Services API
+        ACH_NACHA_File__c:
+          type: boolean
+          description: ACH NACHA file / FedReady/NACHA File Upload
+        ACH_CPP__c:
+          type: boolean
+          description: ACH CPP / Customer Payment Portal (CPP)
+        ACH_Debit__c:
+          type: boolean
+          description: ACH debit
+        ACH_Recurring_Debit__c:
+          type: boolean
+          description: ACH recurring debit
+        ACH_Credit__c:
+          type: boolean
+          description: ACH credit
+        ACH_Recurring_Credit__c:
+          type: boolean
+          description: ACH recurring credit
+        ACH_Refund__c:
+          type: boolean
+          description: ACH refund
+        ACH_Web_Check__c:
+          type: boolean
+          description: ACH web check / Web - Internet Check
+        ACH_Tel_Check__c:
+          type: boolean
+          description: ACH tel check / TEL - Telephone Check
+        ACH_Max_Re_Presentments__c:
+          type: string
+          description: ACH Face Amount Maximum Number of Re-Presentments
+          enum:
+            - 0~ None
+            - 1~ 1 re-presentment
+            - 2~ 2 re-presentments
+        ACH_First_Re_Presentment__c:
+          type: string
+          description: Timing of First Re-Presentment
+          enum:
+            - 0 (Immediately following ACH return)
+            - 1 (1 day following ACH return)
+            - 2 (2 days following ACH return)
+            - 3 (3 days following ACH return)
+            - 4 (4 days following ACH return)
+            - 5 (5 days following ACH return)
+            - 6 (6 days following ACH return)
+            - 7 (7 days following ACH return)
+            - 8 (8 days following ACH return)
+            - 9 (9 days following ACH return)
+            - 10 (10 days following ACH return)
+            - 15 (15 days following ACH return)
+            - 20 (20 days following ACH return)
+            - 25 (25 days following ACH return)
+            - 30 (30 days following ACH return)
+        ACH_Final_Re_Presentment__c:
+          type: string
+          description: Timing of Final Re-Presentment
+          enum:
+            - 0~ Final ACH re-presentment will occur after a fixed number of days
+            - Final ACH re-presentment will coincide with common paydays
+        ACH_Final_Re_Presentment_Days__c:
+          type: number
+          description: ACH Face Amount Final Re-Presentment Days
+        ACH_RCF_Max_Re_Presentments__c:
+          type: string
+          description: ACH Returned Check Fee Maximum Re-Presentments
+          enum:
+            - 0~ None
+            - 1~
+            - 2~
+            - 3~
+        ACH_RCF_Amount__c:
+          type: number
+          description: ACH Returned Check Fee Amount
+        ACH_RCF_Settlement_Account__c:
+          type: string
+          description: ACH Returned Check Fee Settlement Account
+          enum:
+            - 0~ Deposit collected fees into Customer's settlement bank account
+            - 1~ Deposit collected fees into Other bank account
+        
+        # Training
+        MeS_Activation_Training_for_Merchant__c:
+          type: boolean
+          description: Would Merchant Like Training from MeS Activations? / MeS Activation training for merchant
+        Product_Training__c:
+          type: boolean
+          description: Product/POS training
+        PCI_Training__c:
+          type: boolean
+          description: PCI training
+        Business_Platform_Training__c:
+          type: boolean
+          description: Business platform training
+        Level_3_Training__c:
+          type: boolean
+          description: Level 3 training
+        Additional_Info_Training__c:
+          type: string
+          description: Additional information (optional) / Additional info training
+          maxLength: 130768
+        
+        # Additional Solutions
+        Authorization_Host__c:
+          type: string
+          description: Authorization host
+          enum:
+            - Sierra
+            - Summit
+            - Transit/MultiPass
+        Authorization_Host_other__c:
+          type: string
+          description: Authorization host other
+          enum:
+            - Sierra
+            - Summit
+            - Transit/MultiPass
+        Customer_Rate_not_to_exceed_3_50__c:
+          type: number
+          description: Customer rate (not to exceed 3.5%)
+          maximum: 3.5
+        Surcharge__c:
+          type: boolean
+          description: Surcharge
+        Surcharge_Fee__c:
+          type: boolean
+          description: Surcharge fee
+        MerchantE_Invoice_Admin_Email__c:
+          type: string
+          format: email
+          description: MerchantE Invoice administrator email
+        MerchantE_Invoice_Link__c:
+          type: boolean
+          description: MerchantE Invoice Link
+        MerchantE_Invoice_Link_Email__c:
+          type: string
+          format: email
+          description: MerchantE Invoice Link administrator email
+        HostedPayments__c:
+          type: boolean
+          description: Hosted Payments
+        HostedPayAdminEmail__c:
+          type: string
+          format: email
+          description: Hosted Payments administrator email
+        Interchange_Optimization__c:
+          type: boolean
+          description: Interchange Optimization
+        Interchange_Optimization_Email__c:
+          type: string
+          format: email
+          description: Interchange Optimization administrator email
+        MeS_Financial_Services__c:
+          type: boolean
+          description: Money OUT Services / MeS Financial Services
+        
+        # Equipment
+        Equipment_Rent_Buy_Own__c:
+          type: string
+          description: Equipment rent/buy/own
+          enum:
+            - Rent
+            - Buy
+            - Own
+        Equipment_Per_Item__c:
+          type: number
+          description: Equipment per item cost ($)
+        Equipment_Quantity__c:
+          type: integer
+          description: Equipment quantity
+        Equipment_Months__c:
+          type: integer
+          description: Equipment number of months (#)
+        Product_Name__c:
+          type: string
+          description: Product name (required when submitting equipment information)
+          maxLength: 200
+        Equipment_Unique_Field__c:
+          type: string
+          description: Equipment unique field (for identifying multiple equipment items in create/update requests)
+          maxLength: 20
+
+    AttachmentRequest:
+      type: object
+      required:
+        - Opportunity
+        - attachments
+      properties:
+        Opportunity:
+          type: object
+          required:
+            - Id
+          properties:
+            Id:
+              type: string
+              description: Opportunity ID (required for submitting attachments)
+        attachments:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - Body
+              - ContentType
+              - Name
+            properties:
+              Body:
+                type: string
+                format: byte
+                description: File content encoded in Base64 (max 100 MB per file, 2 GB total)
+              ContentType:
+                type: string
+                description: MIME type of the file
+                example: text/plain
+              Name:
+                type: string
+                description: Filename
+                example: hello.txt
+
+    ApplicationResponse:
+      type: object
+      properties:
+        Success:
+          type: boolean
+          description: Indicates if the data element was created/updated successfully (true/false)
+        SourceId:
+          type: string
+          nullable: true
+          description: |
+            Unique identifier for objects with multiple instances:
+            - For Contact: returns value of Beneficial_Owner_Unique_Field__c
+            - For Business Checking Account: returns value of Checking_Account_Unique_Field__c
+            - For Quote Line Item (Equipment): returns value of Equipment_Unique_Field__c
+            - Returns null for single-instance objects (Account, Opportunity, Quote)
+        SFId:
+          type: string
+          description: Unique Salesforce ID for the created/updated record
+        ObjectType:
+          type: string
+          description: Type of data object being sent and received through the API
+          enum:
+            - Account
+            - Opportunity
+            - Contact
+            - Business Checking Account
+            - Quote
+            - QuoteLineItem
+        Message:
+          type: string
+          description: A string of text that indicates if a specific data object was created/updated successfully
+          example: "Merchant Information Created Successfully."
+
+    ValidationError:
+      type: object
+      description: |
+        Validation error response. If any validation errors occur, the entire request is rejected and no information is saved.
+        
+        See PDF pages 69-72 for complete list of validation rules.
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Error message describing the validation failure
+                example: "Phone/Fax number must be a 10-digit number or in (999) 999-9999 format."
+              errorCode:
+                type: string
+                description: Error code
+                example: FIELD_CUSTOM_VALIDATION_EXCEPTION
+              fields:
+                type: array
+                items:
+                  type: string
+                description: Field names that failed validation
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
+          type: string
+
+tags:
+  - name: Authentication
+    description: OAuth 2.0 authentication endpoints
+  - name: Merchant Application
+    description: Create and update merchant applications
+  - name: Retrieval
+    description: Retrieve created records
+  - name: Attachments
+    description: Submit file attachments

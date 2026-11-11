@@ -1,0 +1,564 @@
+openapi: 3.0.3
+info:
+  title: MerchantE Account Updater Service (AUS) API
+  description: |
+    # MerchantE Account Updater Service (AUS) API Specification
+    
+    **Version:** 3.0 (March 2024)
+    **Document Date:** March 2024
+    
+    ## Overview
+    
+    The MerchantE (ME) Account Updater Service (AUS) helps merchants who do installment, recurring, or on-demand billing obtain updated credit card expiration dates and/or account numbers.
+    
+    ### What Gets Updated
+    - Expiration date changes
+    - Card reissued with new account number
+    - Account closed status
+    
+    ### Card Association Programs
+    - **VAU** - Visa Account Updater
+    - **ABU** - MasterCard Automatic Billing Updater
+    - **DAU** - Discover Network Account Updater
+    
+    ### Transmission Methods
+    1. API Method - Programmatic upload/download
+    2. Web Interface - Manual upload through ME Web Reporting
+    
+    ### Critical Timelines
+    - Response File Availability: 4 calendar days from posting
+    - Activity Table Retention: 30 calendar days
+    - Typical Processing Time: Within 24 hours
+    
+    ### Email Notifications
+    All emails from: accountupdater@merchante-solutions.com
+    
+    ## Company Information
+    - **Company:** Merchant eSolutions, Inc.
+    - **Address:** 1150 Sanctuary Parkway, Suite 300, Alpharetta, GA 30009
+    - **Copyright:** ©2024 Merchant eSolutions, Inc.
+    - **Website:** www.merchante.com
+    - **Support:** 888-288-2692 | help@merchante.com
+    
+    ## Banking Relationships
+    Registered Agent of KeyBank, Cleveland, OH, and registered ISO/MSP of Synovus Bank, Columbus, GA and FFB, Fresno, CA.
+    
+    ## File Format Requirements
+    **CRITICAL:** All fields must be exact length, padded with trailing spaces.
+    
+  version: '100000'
+  contact:
+    name: MerchantE 24-hour Help Desk
+    email: help@merchante.com
+    url: https://www.merchante.com
+  x-support:
+    phone: '888-288-2692'
+    hours: 24/7
+
+servers:
+  - url: https://www.merchante-solutions.com/srv/api
+    description: Production Server
+
+tags:
+  - name: File Operations
+  - name: Request File Format
+  - name: Response File Format
+  - name: Testing
+
+paths:
+  /ausUpload:
+    post:
+      tags: [File Operations]
+      summary: Upload AUS Request File
+      description: |
+        Upload request file using multipart/form-data (RFC-1867).
+        
+        File must contain: Header (H1) + Detail Records (D1/D2) + Trailer (T1)
+        
+        **CRITICAL:** All fields must be exact length, padded with trailing spaces.
+      operationId: uploadRequestFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [userId, userPass, merchId, file]
+              properties:
+                userId:
+                  type: string
+                  maxLength: 75
+                  example: ausmerchant
+                userPass:
+                  type: string
+                  maxLength: 32
+                  format: password
+                userPass:
+                  type: string
+                  maxLength: 32
+                  format: password
+                  example: SecureP@ss123
+                merchId:
+                  type: string
+                  maxLength: 32
+                  example: '941000057778'
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload response
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                success:
+                  value: "rspCode=0&rspMessage=Upload+successful&reqfId=123456789012"
+                authError:
+                  value: "rspCode=2&rspMessage=Authentication+error"
+                uploadError:
+                  value: "rspCode=3&rspMessage=Upload+error"
+                paramError:
+                  value: "rspCode=4&rspMessage=Invalid+parameter"
+                merchantError:
+                  value: "rspCode=100&rspMessage=AUS+merchant+ID+error"
+
+  /ausStatus:
+    get:
+      tags: [File Operations]
+      summary: Check File Status
+      description: |
+        Query status of request files and availability of response files.
+        
+        Returns indexed status sets (_0, _1, _2, etc.) for multiple files.
+        
+        Status Types: PENDING, FAILED, SUCCESS
+        
+        Filters: ALL (default), RESPONSE, NEW, ERROR
+      operationId: getFileStatus
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema: {type: string, maxLength: 75}
+        - name: userPass
+          in: query
+          required: true
+          schema: {type: string, maxLength: 32}
+        - name: merchId
+          in: query
+          required: true
+          schema: {type: string, maxLength: 32}
+        - name: statusFilter
+          in: query
+          schema:
+            type: string
+            enum: [ALL, RESPONSE, NEW, ERROR]
+            default: ALL
+        - name: reqfId
+          in: query
+          schema: {type: string, maxLength: 12, pattern: '^\d{1,12}$'}
+      responses:
+        '200':
+          description: Status inquiry response
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                success:
+                  value: "rspCode=0&statusCount=1&reqfId_0=123456&status_0=SUCCESS&rspfId_0=987654&dlCount_0=0"
+
+  /ausDownload:
+    get:
+      tags: [File Operations]
+      summary: Download Response File
+      description: |
+        Download response file using rspfId from status inquiry.
+        
+        **CRITICAL:** Files available for 4 calendar days only.
+        
+        Success returns file data with Content-Disposition header.
+        Error returns standard error response.
+      operationId: downloadResponseFile
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema: {type: string, maxLength: 75}
+        - name: userPass
+          in: query
+          required: true
+          schema: {type: string, maxLength: 32}
+        - name: merchId
+          in: query
+          required: true
+          schema: {type: string, maxLength: 32}
+        - name: rspfId
+          in: query
+          required: true
+          schema: {type: string, maxLength: 12, pattern: '^\d{1,12}$'}
+      responses:
+        '200':
+          description: Response file or error
+          headers:
+            Content-Disposition:
+              schema: {type: string}
+              description: 'attachment; filename="rsp-XXXXXX-N.txt"'
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  schemas:
+    TestCardData:
+      description: |
+        ## Complete Test Card Table for Certification
+        
+        **Test Mode:** No data sent to associations. Only specific test values produce responses.
+        
+        **Card Store Testing:** Create new Card ID for each test returning new card number.
+        
+        | Card Type | Card Number | Source | Response | New Card | New Exp |
+        |-----------|-------------|--------|----------|----------|---------|
+        | VISA | 4805000000000009 | VAU | CLOSED | - | No |
+        | (same) | (same) | ABU | NEWACCT | 5133272000000046 | Yes |
+        | VISA | 4805000000000017 | VAU | NEWACCT | 4805000000000058 | Yes |
+        | VISA | 4805000000000033 | VAU | NEWEXP | 4805000000000033 | Yes |
+        | VISA | 4805000000000041 | VAU | CLOSED | - | No |
+        | MC | 5133272000000053 | ABU | CLOSED | - | No |
+        | (same) | (same) | VAU | NEWACCT | 4805000000000058 | Yes |
+        | MC | 5133272000000004 | ABU | NEWACCT | 5133272000000012 | Yes |
+        | MC | 5133272000000020 | ABU | NEWEXP | 5133272000000020 | Yes |
+        | MC | 5133272000000038 | ABU | CLOSED | - | No |
+        | DISC | 6011000000000004 | DAU | NEWACCT | 6011000000000012 | Yes |
+        | DISC | 6011000000000020 | DAU | CLOSED | - | No |
+        | DISC | 6011000000000038 | DAU | NEWEXP | 6011000000000038 | Yes |
+        | DISC | 6011000000000046 | DAU | CALL | - | No |
+        | DISC | 6011000000000053 | DAU | OVERRIDE | 6011000000000061 | Yes |
+        
+        **Dual Response Cards (Card Type Switch):**
+        - 4805000000000009: VAU CLOSED + ABU NEWACCT (Visa→MC)
+        - 5133272000000053: ABU CLOSED + VAU NEWACCT (MC→Visa)
+        
+        **Testing Notes:**
+        - Exp dates can be any valid YYMM in test mode
+        - Response exp dates generated dynamically
+        - Card Store ID returns truncated: 480500xxxxxx0058
+        - Multiple tests need new Card ID each time
+
+x-file-formats:
+  request-file-header:
+    description: |
+      ## Header Record (H1) - Request File
+      
+      Total: 40 characters + line ending
+      
+      | Pos | Field | Len | Format | Value |
+      |-----|-------|-----|--------|-------|
+      | 1-2 | Record Type | 2 | AN | "H1" |
+      | 3-8 | Version ID | 6 | AN | "100000" |
+      | 9-40 | Merchant ID | 32 | AN | ME Merchant # (pad spaces) |
+      
+      Example: `H1100000941000057778                    `
+
+  request-file-detail-d1:
+    description: |
+      ## Detail Record (D1) - Full Card Numbers
+      
+      Total: 74 characters + line ending
+      
+      | Pos | Field | Len | Format | Description |
+      |-----|-------|-----|--------|-------------|
+      | 1-2 | Record Type | 2 | AN | "D1" |
+      | 3-6 | Account Type | 4 | AN | "VISA", "MC  ", "DISC" |
+      | 7-38 | Account Number | 32 | AN | Card number (pad) |
+      | 39-42 | Expiration | 4 | N | YYMM |
+      | 43-74 | Discretionary | 32 | AN | Optional (pad) |
+      
+      Example: `D1VISA4111111111111111                  1101                                `
+
+  request-file-detail-d2:
+    description: |
+      ## Detail Record (D2) - Card Store ID
+      
+      Total: 74 characters + line ending
+      
+      Same as D1 but:
+      - Record Type: "D2"
+      - Account Number: Card Store ID (exactly 32 chars, no padding needed)
+      - Expiration: YYMM or spaces
+      
+      Example: `D2VISA$8316d09edc34c7b49c11324f37e7ef1101101                                `
+
+  request-file-trailer:
+    description: |
+      ## Trailer Record (T1)
+      
+      Total: 8 characters + line ending
+      
+      | Pos | Field | Len | Format | Description |
+      |-----|-------|-----|--------|-------------|
+      | 1-2 | Record Type | 2 | AN | "T1" |
+      | 3-8 | Record Count | 6 | N | Detail count (zero-pad) |
+      
+      Example: `T1000004`
+
+  response-file-detail-d1:
+    description: |
+      ## Response Detail (D1) - Full Card Numbers
+      
+      Total: 126 characters + line ending
+      
+      | Pos | Field | Len | Format | Description |
+      |-----|-------|-----|--------|-------------|
+      | 1-2 | Record Type | 2 | AN | "D1" |
+      | 3-6 | Old Type | 4 | AN | Original card type |
+      | 7-38 | Old Number | 32 | AN | Original card # |
+      | 39-42 | Old Exp | 4 | N | Original YYMM |
+      | 43-46 | New Type | 4 | AN | New type or spaces |
+      | 47-78 | New Number | 32 | AN | New # or spaces |
+      | 79-82 | New Exp | 4 | N | New YYMM or spaces |
+      | 83-90 | Response Code | 8 | AN | Update status |
+      | 91-92 | Source | 2 | AN | 01/02/03/04 |
+      | 93-124 | Discretionary | 32 | AN | From request |
+
+  response-file-detail-d2:
+    description: |
+      ## Response Detail (D2) - Card Store ID
+      
+      Same as D1 but:
+      - Record Type: "D2"
+      - Old Number: Card Store ID
+      - New Number: TRUNCATED card# (first6+xxxxxx+last4) or spaces
+      
+      Example truncated: `411111xxxxxx1111                `
+
+x-response-codes:
+  update-codes:
+    description: |
+      ## Update Codes (Changes Made)
+      
+      - **NEWACCT**: New account number issued
+      - **NEWEXP**: New expiration date
+      - **OVERRIDE**: Correction to previous response
+  
+  no-update-codes:
+    description: |
+      ## No Update Codes
+      
+      - **GOOD**: Match found, no change needed
+      - **CLOSED**: Account closed, no new number
+      - **CALL**: Contact customer advisory
+  
+  error-codes:
+    description: |
+      ## Error/Non-Match Codes
+      
+      - **NPBIN**: Non-participating BIN
+      - **NOMATCH**: Participating BIN, no match
+      - **ACCTERR**: Bad account number
+      - **EXPERR**: Bad expiration date
+      - **MERCHERR**: Unregistered merchant
+  
+  source-codes:
+    description: |
+      ## Response Sources
+      
+      - **01**: MES (MerchantE System)
+      - **02**: VAU (Visa Account Updater)
+      - **03**: ABU (MasterCard Automatic Billing Updater)
+      - **04**: DAU (Discover Network Account Updater)
+
+x-api-error-codes:
+  description: |
+    ## API Error Codes
+    
+    | Code | Description |
+    |------|-------------|
+    | 0 | OK, operation successful |
+    | 1 | System error, contact ME |
+    | 2 | Authentication error |
+    | 3 | Upload error |
+    | 4 | Invalid parameter |
+    | 5 | Missing parameter |
+    | 100 | AUS merchant ID error |
+    | 101 | AUS status error (invalid filter) |
+    | 102 | AUS response file ID invalid |
+
+x-webhooks:
+  responseFileAvailable:
+    post:
+      summary: Response File Available Notification
+      description: |
+        Email from: accountupdater@merchante-solutions.com
+        Subject: ME Account Updater Response File Available
+        
+        DO NOT REPLY - Automated message
+        
+        Response files available 4 calendar days only.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileId: {type: string, example: '911169'}
+                fileName: {type: string, example: 'rsp-911146-1.txt'}
+                responseDate: {type: string, format: date-time}
+
+  requestFileError:
+    post:
+      summary: Request File Error Notification
+      description: |
+        Email from: accountupdater@merchante-solutions.com
+        Subject: ME Account Updater Request File Error
+        
+        DO NOT REPLY - Automated message
+        
+        Processing halted due to errors.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileId: {type: string}
+                fileName: {type: string}
+                uploadDate: {type: string, format: date-time}
+                errors: {type: array, items: {type: string}}
+
+x-certification:
+  description: |
+    ## Certification Process (4 Steps)
+    
+    1. **Receive Documentation**
+       - API Specifications
+       - Test Script with test card numbers
+       - Enrollment forms and agreements
+    
+    2. **Integration Launch Meeting**
+       - Review file format and API
+       - Verify enrollment paperwork
+       - Test email alerts
+       - Schedule testing
+    
+    3. **Conduct Certification Testing**
+       - Submit to simulator
+       - Review results
+       - No data sent to associations in test mode
+       - Move to production upon success
+    
+    4. **Submit First Production File**
+       - Validate results
+       - Confirm no enrollment errors
+
+x-card-store:
+  description: |
+    ## Card Store Integration
+    
+    **Benefits:**
+    - No card number transmission (send tokens)
+    - Automatic token updates
+    - Enhanced security
+    - Simplified PCI compliance
+    
+    **Workflow:**
+    1. Store card → receive Card Store ID (32 chars)
+    2. Use D2 record type with Card Store ID
+    3. ME retrieves card data automatically
+    4. Associations check for updates
+    5. Token automatically updated
+    6. Continue using same Card Store ID
+    
+    **Response Format:**
+    - Card numbers truncated: first6+xxxxxx+last4
+    - Example: 480500xxxxxx0058
+    - Full data updated in token storage
+    
+    **Testing Note:**
+    Multiple tests with values returning new card# need new Card ID each time.
+
+x-web-interface:
+  description: |
+    ## Web-Based Upload/Retrieval
+    
+    **Access:** ME Web Reporting site → Account Updater Service
+    
+    ### Upload Process:
+    1. Log in to ME Web Reporting
+    2. Click "Account Updater Service"
+    3. Click "Upload Request File"
+    4. Select merchant account
+    5. Browse to file
+    6. Submit
+    
+    ### View Response Files:
+    1. Click "View Response Files"
+    2. Review AUS Activity table
+    3. Download available response files
+    
+    ### AUS Activity Table Fields:
+    - ID, Request Date, User, Merchant #
+    - Request File, Status
+    - Response Date, Response File (link)
+    
+    ### Status Values:
+    - Pending: Awaiting associations
+    - Successful: Response available
+    - Failed: Processing errors
+    
+    ### File Retention:
+    - Response files: 4 calendar days (clickable link)
+    - Activity table: 30 calendar days total
+
+x-summary-report:
+  description: |
+    ## Account Updater Summary Report
+    
+    View activity summary for user-defined date range.
+    
+    **Statistics:**
+    - Total requests/matches
+    - Visa requests/matches/percentage
+    - MasterCard requests/matches/percentage
+    - Discover requests/matches/percentage
+    
+    **Detail Breakdown (by card type):**
+    
+    Visa: CALL, CLOSED, NEWACCT, NEWEXP, GOOD, NOMATCH, NPBIN
+    MasterCard: CLOSED, NEWACCT, NEWEXP
+    Discover: CALL, CLOSED, NEWACCT, NEWEXP, OVERRIDE
+    
+    Note: Visa returns both match and non-match. MC only match. Discover match + specific non-match.
+
+x-examples:
+  request-file-full-card:
+    value: |
+      H1100000941000057778                    
+      D1VISA4111111111111111                  1101                                
+      D1MC  5222222222222222                  0901                                
+      T1000002
+  
+  request-file-card-store:
+    value: |
+      H1100000941000057778                    
+      D2VISA$8316d09edc34c7b49c11324f37e7ef1101101                                
+      D2MC  57be5179ecbe3902b0db21b32ae3a8200901                                
+      T1000002
+  
+  response-file-full-card:
+    value: |
+      H1100000941000057778                    
+      D1VISA4111111111111111                  1101VISA4111111111111111                  1207NEWEXP  02                              
+      D1MC  5222222222222222                  0901                                          CLOSED  03                              
+      T1000002
+  
+  response-file-card-store:
+    value: |
+      H1100000941000057778                    
+      D2VISA$8316d09edc34c7b49c11324f37e7cf110VISA411111xxxxxx1111                  1207NEWEXP  02                              
+      D2MC  57be5179ecbe3902b0db21b32ae3a8200901                                          CLOSED  03                              
+      T1000002
