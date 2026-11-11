@@ -1,5 +1,5 @@
 ---
-title: "Payment Gateway API Guide"
+title: "Payment Gateway Guide"
 ---
 
 The MerchantE by Omise Payment Gateway API lets merchants and resellers process live credit card transactions.
