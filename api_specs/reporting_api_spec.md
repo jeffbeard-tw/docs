@@ -9,7 +9,7 @@ The Report API servlet is available on all servers as:
 
 [**https://www.merchante-solutions.com/jsp/reports/report_api.jsp**](https://www.merchante-solutions.com/jsp/reports/report_api.jsp)
 
-This document describes the MerchantE (ME) Reporting Application Programming Interface (API). The following documents provide additional definition and background information. Please refer to the following documents listed for applicable information:
+This document describes the MerchantE (ME) Reporting Application Programming Interface (API). The following documents provide additional definition and background information. Refer to the following documents listed for applicable information:
 
 - [MerchantE Payment Gateway Specification](https://www.merchante.com/developer-portal/payment-gateway-api)
 
