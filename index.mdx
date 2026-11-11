@@ -1,0 +1,43 @@
+---
+title: "MerchantE Developer Center"
+description: "Everything you need to build with our platform."
+mode: "custom"
+---
+
+export const HeroCard = ({ title, description, href, icon }) => (
+  <a className="group block p-6 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 transition-colors" href={href}>
+    <h3 className="font-medium text-gray-900 dark:text-zinc-50">
+      {title}
+    </h3>
+    <p className="mt-2 text-sm text-gray-500 dark:text-zinc-500">
+      {description}
+    </p>
+  </a>
+);
+
+<div className="px-4 py-16 lg:py-32 max-w-3xl mx-auto text-center">
+  <h1 className="text-4xl font-medium text-gray-900 dark:text-zinc-50 tracking-tight">
+    Documentation
+  </h1>
+  <p className="mt-4 text-lg text-gray-500 dark:text-zinc-500 max-w-xl mx-auto">
+    Everything you need to build, deploy, and scale your application.
+  </p>
+</div>
+
+<div className="max-w-4xl mx-auto px-6 pb-16 grid sm:grid-cols-2 gap-4">
+  <HeroCard
+    title="Quickstart"
+    description="Get up and running."
+    href="/quickstart"
+  />
+  <HeroCard
+    title="API reference"
+    description="Explore endpoints, parameters, and examples."
+    href="/api-reference"
+  />
+  <HeroCard
+    title="Guides"
+    description="Step-by-step tutorials for common tasks."
+    href="/guides"
+  />
+</div>

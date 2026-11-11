@@ -1,0 +1,56 @@
+---
+title: "MerchantE Quickstart Guide"
+description: "Send your first test transaction to the MerchantE Payment Gateway API."
+---
+
+This guide walks you through sending a test payment to the certification environment of the MerchantE Payment Gateway API.
+
+## 1. Get test credentials
+
+1. Visit the [MerchantE developer portal](http://developer.merchante.com).
+2. Submit the certification request form.
+3. Receive your credentials by email. The [API specification](/api-reference/payment-gateway/sales/process-payment-transaction) says to expect them within 24 to 48 hours.
+
+You receive two values:
+
+- `profile_id`: your merchant ID.
+- `profile_key`: your API password.
+
+<Warning>
+  Treat `profile_key` like a password. Never commit it to source control or expose it in client-side code.
+</Warning>
+
+## 2. Configure your client
+
+- **Base URL (certification):** `https://cert.merchante-solutions.com/mes-api/tridentApi`
+- **Method:** `POST`
+- **Content type:** `application/x-www-form-urlencoded`
+- **Authentication:** Include `profile_id` and `profile_key` in the body of every request. Don't send them as headers.
+
+## 3. Send a test sale
+
+Use a certification test card number. For example, `4012301230121237` returns a standard Visa approval.
+
+```bash
+curl -X POST "https://cert.merchante-solutions.com/mes-api/tridentApi" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  --data-urlencode "profile_id=$ME_PROFILE_ID" \
+  --data-urlencode "profile_key=$ME_PROFILE_KEY" \
+  --data-urlencode "transaction_type=D" \
+  --data-urlencode "card_number=4012301230121237" \
+  --data-urlencode "card_exp_date=12/30" \
+  --data-urlencode "transaction_amount=1.00"
+```
+
+The response is a set of `name=value` pairs, such as `transaction_id`, `error_code` and `auth_response_text`. An `error_code` of `000` indicates success.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Guides" href="/guides">
+    Read the integration guide for each API.
+  </Card>
+  <Card title="API reference" href="/api-reference">
+    Explore endpoints, parameters, and examples.
+  </Card>
+</CardGroup>

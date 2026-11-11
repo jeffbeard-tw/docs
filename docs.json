@@ -19,7 +19,8 @@
           "api_specs/batch_processing_api_spec",
           "api_specs/partner_to_portal_api_spec",
           "api_specs/split_funding_api_spec",
-          "api_specs/submerchant_api_spec"
+          "api_specs/submerchant_api_spec",
+          "api_specs/account_updater_api_spec"
         ]
       },
       {

@@ -1,5 +1,7 @@
+---
+title: "Account Updater API Guide"
+---
 
-# Overview
 
 The MerchantE by Omise (ME) Account Updater Service (AUS) helps merchants who do installment, recurring, or on-demand billing obtain updated credit card expiration dates and/or account numbers. AUS also identifies cards that have been closed with no new number assigned. By programmatically uploading a data file with account information to MerchantE through a simple API, an inquiry will be made to both Visa and MasterCard.
 
@@ -54,7 +56,7 @@ Email alerts are sent out under the following conditions:
 
 Since both events require immediate attention, it is critical that MerchantE has an email address on file for the person responsible for handling these situations. It is also necessary to validate that emails from ME can be received at that address. During the certification process, a test email will be sent and receipt of email will be verified. It may be necessary to add ME to a list of acceptable senders if SPAM filters are blocking receipt.
 
-All emails will originate from <accountupdater@merchante-solutions.com>.
+All emails will originate from [accountupdater@merchante-solutions.com](mailto:accountupdater@merchante-solutions.com).
 
 ## Testing
 

@@ -1,0 +1,80 @@
+---
+title: "API reference"
+description: "Endpoint reference for each MerchantE API."
+---
+
+## Payment Gateway API
+
+<CardGroup cols={2}>
+  <Card title="Process payment transaction" href="/api-reference/payment-gateway/sales/process-payment-transaction">
+    POST /transaction
+  </Card>
+</CardGroup>
+
+## Account Updater API
+
+<CardGroup cols={2}>
+  <Card title="Upload AUS Request File" href="/api-reference/account-updater/file-operations/upload-aus-request-file">
+    POST /ausUpload
+  </Card>
+  <Card title="Check File Status" href="/api-reference/account-updater/file-operations/check-file-status">
+    GET /ausStatus
+  </Card>
+  <Card title="Download Response File" href="/api-reference/account-updater/file-operations/download-response-file">
+    GET /ausDownload
+  </Card>
+</CardGroup>
+
+## Batch Processing API
+
+<CardGroup cols={2}>
+  <Card title="Upload batch request file" href="/api-reference/batch-processing/batch-processing/upload-batch-request-file">
+    POST /bpUpload
+  </Card>
+  <Card title="Download batch response file" href="/api-reference/batch-processing/batch-processing/download-batch-response-file">
+    POST /bpDownload
+  </Card>
+</CardGroup>
+
+## Partner Portal API
+
+<CardGroup cols={2}>
+  <Card title="Get Authentication Token" href="/api-reference/partner-portal/authentication/get-authentication-token">
+    POST /services/oauth2/token
+  </Card>
+  <Card title="Create Merchant Application" href="/api-reference/partner-portal/merchant-application/create-merchant-application">
+    POST /services/data/v54.0/composite/sobjects
+  </Card>
+  <Card title="Update Merchant Application" href="/api-reference/partner-portal/merchant-application/update-merchant-application">
+    PATCH /services/data/v54.0/composite/sobjects
+  </Card>
+  <Card title="Get Opportunity" href="/api-reference/partner-portal/retrieval/get-opportunity">
+    GET /services/data/v54.0/sobjects/Opportunity/&#123;opportunityId&#125;
+  </Card>
+  <Card title="Get Account" href="/api-reference/partner-portal/retrieval/get-account">
+    GET /services/data/v54.0/sobjects/Opportunity/&#123;opportunityId&#125;/Account
+  </Card>
+  <Card title="Get Contacts" href="/api-reference/partner-portal/retrieval/get-contacts">
+    GET /services/data/v54.0/sobjects/Opportunity/&#123;opportunityId&#125;/Account/Contacts
+  </Card>
+  <Card title="Get Business Checking Accounts" href="/api-reference/partner-portal/retrieval/get-business-checking-accounts">
+    GET /services/data/v54.0/sobjects/Opportunity/&#123;opportunityId&#125;/Account/Business_Checking_Accounts__r
+  </Card>
+  <Card title="Get Quotes" href="/api-reference/partner-portal/retrieval/get-quotes">
+    GET /services/data/v54.0/sobjects/Opportunity/&#123;opportunityId&#125;/Quotes
+  </Card>
+  <Card title="Get Quote Line Items" href="/api-reference/partner-portal/retrieval/get-quote-line-items">
+    GET /services/data/v54.0/sobjects/Quote/&#123;quoteId&#125;/QuoteLineItems
+  </Card>
+  <Card title="Submit Attachments" href="/api-reference/partner-portal/attachments/submit-attachments">
+    POST /services/data/v54.0/sobjects/Attachment
+  </Card>
+</CardGroup>
+
+## Split Funding API
+
+<CardGroup cols={2}>
+  <Card title="Create or modify funding amounts" href="/api-reference/split-funding/funding-amounts/create-or-modify-funding-amounts">
+    POST /funding-amounts
+  </Card>
+</CardGroup>
