@@ -1,8 +1,9 @@
 /* API reference method tiles. Colors match the GET/POST method pills in the sidebar. */
 .api-tile {
   display: block;
-  padding: 1rem;
-  border-radius: 1rem;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  border-radius: 0.75rem;
   border: 1px solid;
   text-decoration: none;
   transition: transform 150ms ease;

@@ -3,15 +3,14 @@ title: "API reference"
 description: "Endpoint reference for each MerchantE API."
 ---
 
-export const ApiTile = ({ method, title, path, href }) => {
+export const ApiTile = ({ method, title, href }) => {
   const kind = method === "GET" ? "api-tile-get" : method === "POST" ? "api-tile-post" : method === "PATCH" ? "api-tile-patch" : "api-tile-other";
   return (
     <a href={href} className={"api-tile " + kind}>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-center gap-2 text-sm">
         <span className="text-xs font-bold">{method}</span>
         <span className="font-semibold">{title}</span>
       </div>
-      <div className="mt-2 text-sm break-all" style={{ fontFamily: "monospace" }}>{path}</div>
     </a>
   );
 };
@@ -19,41 +18,41 @@ export const ApiTile = ({ method, title, path, href }) => {
 ## Payment Gateway API
 
 <CardGroup cols={2}>
-  <ApiTile method="POST" title="Process payment transaction" path="/transaction" href="/api-reference/payment-gateway/sales/process-payment-transaction" />
+  <ApiTile method="POST" title="Process payment transaction" href="/api-reference/payment-gateway/sales/process-payment-transaction" />
 </CardGroup>
 
 ## Account Updater API
 
 <CardGroup cols={2}>
-  <ApiTile method="POST" title="Upload AUS Request File" path="/ausUpload" href="/api-reference/account-updater/file-operations/upload-aus-request-file" />
-  <ApiTile method="GET" title="Check File Status" path="/ausStatus" href="/api-reference/account-updater/file-operations/check-file-status" />
-  <ApiTile method="GET" title="Download Response File" path="/ausDownload" href="/api-reference/account-updater/file-operations/download-response-file" />
+  <ApiTile method="POST" title="Upload AUS Request File" href="/api-reference/account-updater/file-operations/upload-aus-request-file" />
+  <ApiTile method="GET" title="Check File Status" href="/api-reference/account-updater/file-operations/check-file-status" />
+  <ApiTile method="GET" title="Download Response File" href="/api-reference/account-updater/file-operations/download-response-file" />
 </CardGroup>
 
 ## Batch Processing API
 
 <CardGroup cols={2}>
-  <ApiTile method="POST" title="Upload batch request file" path="/bpUpload" href="/api-reference/batch-processing/batch-processing/upload-batch-request-file" />
-  <ApiTile method="POST" title="Download batch response file" path="/bpDownload" href="/api-reference/batch-processing/batch-processing/download-batch-response-file" />
+  <ApiTile method="POST" title="Upload batch request file" href="/api-reference/batch-processing/batch-processing/upload-batch-request-file" />
+  <ApiTile method="POST" title="Download batch response file" href="/api-reference/batch-processing/batch-processing/download-batch-response-file" />
 </CardGroup>
 
 ## Partner Portal API
 
 <CardGroup cols={2}>
-  <ApiTile method="POST" title="Get Authentication Token" path="/services/oauth2/token" href="/api-reference/partner-portal/authentication/get-authentication-token" />
-  <ApiTile method="POST" title="Create Merchant Application" path="/services/data/v54.0/composite/sobjects" href="/api-reference/partner-portal/merchant-application/create-merchant-application" />
-  <ApiTile method="PATCH" title="Update Merchant Application" path="/services/data/v54.0/composite/sobjects" href="/api-reference/partner-portal/merchant-application/update-merchant-application" />
-  <ApiTile method="GET" title="Get Opportunity" path="/services/data/v54.0/sobjects/Opportunity/{opportunityId}" href="/api-reference/partner-portal/retrieval/get-opportunity" />
-  <ApiTile method="GET" title="Get Account" path="/services/data/v54.0/sobjects/Opportunity/{opportunityId}/Account" href="/api-reference/partner-portal/retrieval/get-account" />
-  <ApiTile method="GET" title="Get Contacts" path="/services/data/v54.0/sobjects/Opportunity/{opportunityId}/Account/Contacts" href="/api-reference/partner-portal/retrieval/get-contacts" />
-  <ApiTile method="GET" title="Get Business Checking Accounts" path="/services/data/v54.0/sobjects/Opportunity/{opportunityId}/Account/Business_Checking_Accounts__r" href="/api-reference/partner-portal/retrieval/get-business-checking-accounts" />
-  <ApiTile method="GET" title="Get Quotes" path="/services/data/v54.0/sobjects/Opportunity/{opportunityId}/Quotes" href="/api-reference/partner-portal/retrieval/get-quotes" />
-  <ApiTile method="GET" title="Get Quote Line Items" path="/services/data/v54.0/sobjects/Quote/{quoteId}/QuoteLineItems" href="/api-reference/partner-portal/retrieval/get-quote-line-items" />
-  <ApiTile method="POST" title="Submit Attachments" path="/services/data/v54.0/sobjects/Attachment" href="/api-reference/partner-portal/attachments/submit-attachments" />
+  <ApiTile method="POST" title="Get Authentication Token" href="/api-reference/partner-portal/authentication/get-authentication-token" />
+  <ApiTile method="POST" title="Create Merchant Application" href="/api-reference/partner-portal/merchant-application/create-merchant-application" />
+  <ApiTile method="PATCH" title="Update Merchant Application" href="/api-reference/partner-portal/merchant-application/update-merchant-application" />
+  <ApiTile method="GET" title="Get Opportunity" href="/api-reference/partner-portal/retrieval/get-opportunity" />
+  <ApiTile method="GET" title="Get Account" href="/api-reference/partner-portal/retrieval/get-account" />
+  <ApiTile method="GET" title="Get Contacts" href="/api-reference/partner-portal/retrieval/get-contacts" />
+  <ApiTile method="GET" title="Get Business Checking Accounts" href="/api-reference/partner-portal/retrieval/get-business-checking-accounts" />
+  <ApiTile method="GET" title="Get Quotes" href="/api-reference/partner-portal/retrieval/get-quotes" />
+  <ApiTile method="GET" title="Get Quote Line Items" href="/api-reference/partner-portal/retrieval/get-quote-line-items" />
+  <ApiTile method="POST" title="Submit Attachments" href="/api-reference/partner-portal/attachments/submit-attachments" />
 </CardGroup>
 
 ## Split Funding API
 
 <CardGroup cols={2}>
-  <ApiTile method="POST" title="Create or modify funding amounts" path="/funding-amounts" href="/api-reference/split-funding/funding-amounts/create-or-modify-funding-amounts" />
+  <ApiTile method="POST" title="Create or modify funding amounts" href="/api-reference/split-funding/funding-amounts/create-or-modify-funding-amounts" />
 </CardGroup>
