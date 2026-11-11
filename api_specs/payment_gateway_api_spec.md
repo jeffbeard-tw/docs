@@ -156,7 +156,7 @@ Processing section.
 ## Dynamic Doing Business As (DBA)
 
 The use of Dynamic Doing Business As (DBA) requires ME Risk approval.
-Please contact Solution Consulting at <solution.consulting@merchante.com>
+Please contact Solution Consulting at [solution.consulting@merchante.com](mailto:solution.consulting@merchante.com)
 for more information. Data in these fields will override the profile DBA
 data. The client must complete Payment Gateway Certification for this
 feature and provide a static prefix value of 3, 7, or 12 characters to
@@ -188,9 +188,9 @@ used by the gateway, like card track data or cardholder verification
 codes, should not be stored. Information about PCI compliance is
 available at:
 
-- **<https://www.pcisecuritystandards.org/>**
+- **[https://www.pcisecuritystandards.org/](https://www.pcisecuritystandards.org/)**
 
-- **<https://www.visa.com/cisp>**
+- **[https://www.visa.com/cisp](https://www.visa.com/cisp)**
 
 Merchants are also responsible for building safe, secure systems to
 process API requests and responses. For example, merchants should use
@@ -275,7 +275,7 @@ future.
 | profile_key | API password assigned by MerchantE | Required | FhcOqsIRkbrsvhlq... | AN (32) |
 | store_card | Creates permanent token request | Optional | y | AN (1) |
 | transaction_id* | Unique identifier for the transaction. | Required | 8fc94e10b12130f4... | AN (32) |
-| transaction_type | **X** = Delete stored card<br> **T** = Temporary token | Required | X | AN (1) |
+| transaction_type | **X** = Delete stored card<br /> **T** = Temporary token | Required | X | AN (1) |
 
 **Note:** * Fields added for the Visa Digital Commerce Authentication Program.
 
@@ -328,7 +328,7 @@ or 30 minutes after creation, if unused.
 
 | **Field** | **Description** | **Required** | **Indicator Value / Definition** | **Type** |
 | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| cit_mit_indicator | Use the value that best meets your use case. This is submitted in subsequent CoF transactions. | Conditional | Cardholder-Initiated:<br>**C101** — Credential-on-File (ad-hoc),<br>**C102** — Standing Order (variable amount and fixed frequency),<br>**C103** — Subscription (fixed amount and frequency),<br>**C104** — Installment (single purchase with known amount and set frequency) | AN (4) |
+| cit_mit_indicator | Use the value that best meets your use case. This is submitted in subsequent CoF transactions. | Conditional | Cardholder-Initiated:<br />**C101** — Credential-on-File (ad-hoc),<br />**C102** — Standing Order (variable amount and fixed frequency),<br />**C103** — Subscription (fixed amount and frequency),<br />**C104** — Installment (single purchase with known amount and set frequency) | AN (4) |
 | account_data_source | For details, see [Account Data Source](#account-data-source-code) (Include `account_data_source=Y` on subsequent temporary token sales with CIT.) | Conditional | Y=subsequent card on file (COF) | AN (1) |
 | card_on_file | Transaction is card on file. (Include `card_on_file=Y` on subsequent temporary token sales with CIT.) | Conditional | Y or N (default) | AN (1) |
 
@@ -2884,7 +2884,7 @@ processed as tests, so there is no need to worry about settlement to a
 customer account.
 
 Certification Host:
-<https://cert.merchante-solutions.com/mes-api/tridentApi>
+[https://cert.merchante-solutions.com/mes-api/tridentApi](https://cert.merchante-solutions.com/mes-api/tridentApi)
 
 ## Test Card Numbers Table
 
@@ -2948,7 +2948,7 @@ These are the AAV Fields.
 | cardholder_first_name | CHRIS | Y = Match |
 | cardholder_last_name | FROST | Y = Match |
 | cardholder_phone | 7035551212 | Y = Match |
-| cardholder_email This is an Internet Telephone Data (ITD) field. | <CFFROST@EMAILADDRESS.COM> | Y = Match |
+| cardholder_email This is an Internet Telephone Data (ITD) field. | CFFROST@EMAILADDRESS.COM | Y = Match |
 
 ### American Express Zero Value Account Verification Messaging (ZVAV) Table Fields
 
