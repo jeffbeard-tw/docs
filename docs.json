@@ -10,8 +10,9 @@
   "favicon": "/favicon.svg",
   "navigation": {
     "pages": [
+      "merchant-e-developer-center",
       {
-        "group": "API Guides",
+        "group": "API guides",
         "pages": [
           "api_specs/payment_gateway_api_spec",
           "api_specs/reporting_api_spec",
@@ -91,9 +92,8 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "linkedin": "https://linkedin.com/company/merchante",
+      "website": "https://www.merchante.com/"
     }
   },
   "background": {
@@ -104,14 +104,7 @@
     }
   },
   "fonts": {
-    "heading": {
-      "family": "Outfit",
-      "weight": 600
-    },
-    "body": {
-      "family": "DM Sans",
-      "weight": 400
-    }
+    "family": "DM Sans"
   },
   "description": "The MerchantE Developer Center contains information on the MerchantE APIs. Merchant developers integrate and build with MerchantE APIs so their businesses programmatically process, manage, and integrate payment and platform operations directly into their websites, mobile apps, or custom software. The site gives API reference information and integration guides for the Payment Gateway API and other MerchantE APIs."
 }
