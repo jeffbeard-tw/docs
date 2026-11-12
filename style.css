@@ -55,9 +55,14 @@
   padding: 1.25rem 1.5rem;
   border-radius: 1rem;
   text-decoration: none;
-  background: #80FFBF;
+  background: #F5F7FA;
+  border: 2px solid #80FFBF;
   color: #05080D;
   transition: transform 150ms ease;
+}
+.dark .guide-tile {
+  background: #05080D;
+  color: #F2F2F2;
 }
 .guide-tile:hover {
   transform: translateY(-0.125rem);
