@@ -3,20 +3,20 @@ title: "API guides"
 description: "Integration guides for the MerchantE APIs."
 ---
 
-export const GuideTile = ({ title, description, href, tone }) => (
-  <a href={href} className={"guide-tile guide-tile-" + tone}>
+export const GuideTile = ({ title, description, href }) => (
+  <a href={href} className="guide-tile">
     <div className="guide-tile-title">{title}</div>
     <div className="guide-tile-text">{description}</div>
   </a>
 );
 
 <CardGroup cols={2}>
-  <GuideTile tone="blue" title="Payment Gateway API Guide" description="Process live credit card transactions." href="/api_specs/payment_gateway_api_spec" />
-  <GuideTile tone="green" title="Payment Gateway ACH API Guide" description="Process payments and refunds with checking account information through ACH." href="/api_specs/ach_pg_api_spec" />
-  <GuideTile tone="mint" title="Account Updater API Guide" description="Obtain updated card expiration dates and account numbers." href="/api_specs/account_updater_api_spec" />
-  <GuideTile tone="black" title="Batch Processing API Guide" description="Process live credit card transactions in a batch format." href="/api_specs/batch_processing_api_spec" />
-  <GuideTile tone="blue" title="Partner to Portal API Guide" description="Pass merchant business information for a sales opportunity or application to MerchantE." href="/api_specs/partner_to_portal_api_spec" />
-  <GuideTile tone="green" title="Split Funding API Guide" description="Split daily settlement amounts into two bank accounts." href="/api_specs/split_funding_api_spec" />
-  <GuideTile tone="mint" title="Sub-Merchant API Guide" description="Onboard sub-merchants as a Payment Facilitator." href="/api_specs/submerchant_api_spec" />
-  <GuideTile tone="black" title="Reporting API Guide" description="Download reconciliation reports in CSV or XML format." href="/api_specs/reporting_api_spec" />
+  <GuideTile title="Payment Gateway API Guide" description="Process live credit card transactions." href="/api_specs/payment_gateway_api_spec" />
+  <GuideTile title="Payment Gateway ACH API Guide" description="Process payments and refunds with checking account information through ACH." href="/api_specs/ach_pg_api_spec" />
+  <GuideTile title="Account Updater API Guide" description="Obtain updated card expiration dates and account numbers." href="/api_specs/account_updater_api_spec" />
+  <GuideTile title="Batch Processing API Guide" description="Process live credit card transactions in a batch format." href="/api_specs/batch_processing_api_spec" />
+  <GuideTile title="Partner to Portal API Guide" description="Pass merchant business information for a sales opportunity or application to MerchantE." href="/api_specs/partner_to_portal_api_spec" />
+  <GuideTile title="Split Funding API Guide" description="Split daily settlement amounts into two bank accounts." href="/api_specs/split_funding_api_spec" />
+  <GuideTile title="Sub-Merchant API Guide" description="Onboard sub-merchants as a Payment Facilitator." href="/api_specs/submerchant_api_spec" />
+  <GuideTile title="Reporting API Guide" description="Download reconciliation reports in CSV or XML format." href="/api_specs/reporting_api_spec" />
 </CardGroup>

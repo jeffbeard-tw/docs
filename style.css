@@ -55,6 +55,8 @@
   padding: 1.25rem 1.5rem;
   border-radius: 1rem;
   text-decoration: none;
+  background: #80FFBF;
+  color: #05080D;
   transition: transform 150ms ease;
 }
 .guide-tile:hover {
@@ -71,7 +73,3 @@
   font-size: 0.875rem;
   line-height: 1.5;
 }
-.guide-tile-blue  { background: #3333FF; color: #F2F2F2; }
-.guide-tile-green { background: #30BF8F; color: #05080D; }
-.guide-tile-mint  { background: #80FFBF; color: #05080D; }
-.guide-tile-black { background: #05080D; color: #80FFBF; border: 1px solid #80FFBF; }
